@@ -268,7 +268,7 @@ header h1 {
   flex: 1;          /* 縦方向の余白をすべて使う */
   min-height: 120px;
 }
-.sort-canvas {
+.array-canvas {
   display: block;
   width: 100%;
   height: 100%;     /* ラッパーいっぱいに広がる */

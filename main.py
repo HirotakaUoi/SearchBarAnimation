@@ -1,10 +1,9 @@
 """
-main.py  –  FastAPI + WebSocket バックエンド
-起動: uvicorn main:app --reload --port 8000
+main.py – FastAPI + WebSocket バックエンド (ArrayAnimation)
+起動: uvicorn main:app --reload --port 8004
 """
 
 import asyncio
-import inspect
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -13,15 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 
-from sort_algorithms import (
-    AlgorithmList, DataSizeList, DataConditionList,
-    make_data,
-)
+from algorithms import AlgorithmList, DataSizeList
 
-app = FastAPI(title="SortAnimation API")
+app = FastAPI(title="ArrayAnimation API")
 
 # セッション管理: { session_id: { generator, speed, paused, stopped, ... } }
 sessions: dict[str, dict] = {}
@@ -33,15 +29,10 @@ sessions: dict[str, dict] = {}
 
 @app.get("/api/algorithms")
 def get_algorithms():
-    result = []
-    for i, (name, fn) in enumerate(AlgorithmList):
-        sig = inspect.signature(fn)
-        result.append({
-            "id":             i,
-            "name":           name,
-            "needs_max_tasks": "max_tasks" in sig.parameters,
-        })
-    return result
+    return [
+        {"id": i, "name": name, "meta": meta}
+        for i, (name, fn, meta) in enumerate(AlgorithmList)
+    ]
 
 
 @app.get("/api/datasizes")
@@ -49,18 +40,11 @@ def get_datasizes():
     return DataSizeList
 
 
-@app.get("/api/conditions")
-def get_conditions():
-    return [{"id": i, "name": name} for i, name in enumerate(DataConditionList)]
-
-
 class StartParams(BaseModel):
     algorithm_id: int
-    num_items: int
-    data_condition: int = 0          # 0=ランダム … 4=ステップ値
-    speed: float = 0.08              # 秒/フレーム
-    max_tasks: int = 0               # 0=無制限 / >=2=並列数制限（needs_max_tasks なアルゴリズム用）
-    initial_data: Optional[list[int]] = None  # フロントエンドから共有データを受け取る場合
+    num_items:    int   = 16
+    speed:        float = 0.08   # 秒/フレーム
+    target:       Optional[int] = None   # None = サーバー側で自動生成
 
 
 @app.post("/api/start")
@@ -68,48 +52,27 @@ def start_session(params: StartParams):
     if params.algorithm_id not in range(len(AlgorithmList)):
         return JSONResponse({"error": "invalid algorithm_id"}, status_code=400)
 
-    num_items = params.num_items
-    data_max  = 300 if num_items > 150 else 100
-
-    if params.initial_data and len(params.initial_data) == num_items:
-        data  = list(params.initial_data)
-        color = ["b"] * num_items
-    else:
-        data, color = make_data(num_items, data_max, params.data_condition)
-
-    algo_name, algo_fn = AlgorithmList[params.algorithm_id]
-    sig = inspect.signature(algo_fn)
-    if "max_tasks" in sig.parameters:
-        mt = max(2, params.max_tasks) if params.max_tasks >= 2 else 4
-        generator = algo_fn(data, color, max_tasks=mt)
-    else:
-        generator = algo_fn(data, color)
+    algo_name, algo_fn, algo_meta = AlgorithmList[params.algorithm_id]
+    generator = algo_fn(params.num_items, params.target)
 
     session_id = str(uuid.uuid4())
     sessions[session_id] = {
-        "generator":    generator,
-        "speed":        params.speed,
-        "paused":       False,
-        "stopped":      False,
-        "algo_name":    algo_name,
-        "num_items":    num_items,
-        "data_max":     data_max,
+        "generator": generator,
+        "speed":     params.speed,
+        "paused":    False,
+        "stopped":   False,
+        "algo_name": algo_name,
+        "num_items": params.num_items,
     }
     return {
-        "session_id":  session_id,
-        "algo_name":   algo_name,
-        "num_items":   num_items,
-        "data_max":    data_max,
+        "session_id": session_id,
+        "algo_name":  algo_name,
+        "num_items":  params.num_items,
     }
 
 
 # ---------------------------------------------------------------------------
 # WebSocket  /ws/{session_id}
-# クライアントからの制御メッセージ:
-#   {"action": "set_speed", "speed": 0.05}
-#   {"action": "pause"}
-#   {"action": "resume"}
-#   {"action": "stop"}
 # ---------------------------------------------------------------------------
 
 @app.websocket("/ws/{session_id}")
@@ -124,12 +87,10 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
     session = sessions[session_id]
 
     async def send_frames():
-        """アルゴリズム generator を順にクライアントへ送信する"""
         try:
             for frame in session["generator"]:
                 if session["stopped"]:
                     break
-                # ポーズ中は待機
                 while session["paused"] and not session["stopped"]:
                     await asyncio.sleep(0.05)
                 if session["stopped"]:
@@ -140,7 +101,6 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
             pass
 
     async def recv_controls():
-        """クライアントからの制御コマンドを受け取る"""
         try:
             while True:
                 msg = await ws.receive_json()
@@ -177,12 +137,8 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
 
 
 # ---------------------------------------------------------------------------
-# 静的ファイルサーブ (最後に登録)
+# 静的ファイル
 # ---------------------------------------------------------------------------
-# NOTE: "/" への Mount は Render などのプロキシ環境で WebSocket を横取りする
-#       ため、静的アセットは "/static" に置き、ルートは明示的に返す。
-
-from fastapi.responses import FileResponse
 
 @app.get("/")
 async def root():
