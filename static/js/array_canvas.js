@@ -34,30 +34,32 @@ class ArrayCanvas {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, this.cw, this.ch);
 
-    // テキストエリア (上部)
-    const TEXT_LINE_H = 20;
-    const textH = texts.length > 0 ? texts.length * TEXT_LINE_H + 6 : 2;
-
-    ctx.save();
-    ctx.font = "13px monospace";
-    for (let i = 0; i < texts.length; i++) {
-      ctx.fillStyle = texts[i].color || "#ddd";
-      ctx.textAlign = "left";
-      ctx.fillText(texts[i].message, 8, 4 + (i + 1) * TEXT_LINE_H);
-    }
-    ctx.restore();
-
-    // オブジェクトエリア
-    const objAreaTop = textH;
-    const objAreaH   = this.ch - objAreaTop;
-    const nObjs      = objects.length;
+    // オブジェクトエリア (常にキャンバス全体を使う)
+    const nObjs = objects.length;
     if (nObjs > 0) {
-      const eachH = objAreaH / nObjs;
+      const eachH = this.ch / nObjs;
       for (let oi = 0; oi < nObjs; oi++) {
         if (objects[oi].type === "array1d") {
-          this._drawArray1d(objects[oi], objAreaTop + oi * eachH, eachH);
+          this._drawArray1d(objects[oi], oi * eachH, eachH);
         }
       }
+    }
+
+    // テキストオーバーレイ (グラフの上に半透明背景で重ねる)
+    if (texts.length > 0) {
+      const TEXT_LINE_H = 18;
+      const pad = 6;
+      const boxH = texts.length * TEXT_LINE_H + pad * 2;
+      ctx.save();
+      ctx.fillStyle = "rgba(10, 14, 26, 0.78)";
+      ctx.fillRect(0, 0, this.cw, boxH);
+      ctx.font = "13px monospace";
+      for (let i = 0; i < texts.length; i++) {
+        ctx.fillStyle = texts[i].color || "#ddd";
+        ctx.textAlign = "left";
+        ctx.fillText(texts[i].message, 8, pad + (i + 1) * TEXT_LINE_H - 3);
+      }
+      ctx.restore();
     }
 
     // 完了オーバーレイ
