@@ -13,6 +13,7 @@ algorithms.py – Web 向けアルゴリズムジェネレータ
       "fills":          [{"from": int, "to": int, "color": str}, ...],
       "pointer":        {"index": int, "label": str, "color": str} | None,
       "watchman_index": int | None,
+      "target":         int | None,   # 参照バー用
     }
   ],
   "texts":    [{"message": str, "color": str}, ...],
@@ -31,7 +32,7 @@ def _f(objects, texts=None, finished=False):
     return {"objects": objects, "texts": texts or [], "finished": finished}
 
 
-def _a(id, values, label="", hl=None, fills=None, ptr=None, watchman=None):
+def _a(id, values, label="", hl=None, fills=None, ptr=None, watchman=None, target=None):
     """array1d オブジェクト記述子を作成する。"""
     return {
         "id":             id,
@@ -42,6 +43,7 @@ def _a(id, values, label="", hl=None, fills=None, ptr=None, watchman=None):
         "fills":          fills or [],
         "pointer":        ptr,
         "watchman_index": watchman,
+        "target":         target,
     }
 
 
@@ -68,7 +70,7 @@ def linear_search(n, target=None):
     N = n
     base = [{"message": f"N = {N},   target = {target}", "color": "white"}]
 
-    yield _f([_a("data", data, "Data")], base)
+    yield _f([_a("data", data, "Data", target=target)], base)
 
     for i in range(N):
         found = (data[i] == target)
@@ -79,15 +81,15 @@ def linear_search(n, target=None):
         if found:
             t2 = base + [{"message": f"Found!   index = {i}", "color": "red"}]
             for _ in range(3):
-                yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"))], t2)
-                yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"))], t2)
-            yield _f([_a("data", data, "Data", hl={i: "#ff4444"})], t2, finished=True)
+                yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), target=target)], t2)
+                yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), target=target)], t2)
+            yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, target=target)], t2, finished=True)
             return
 
-        yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=ptr)], t)
+        yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=ptr, target=target)], t)
 
     t = base + [{"message": "Target Not Found!", "color": "red"}]
-    yield _f([_a("data", data, "Data")], t, finished=True)
+    yield _f([_a("data", data, "Data", target=target)], t, finished=True)
 
 
 # ---------------------------------------------------------------------------
@@ -101,28 +103,28 @@ def linear_search_watchman(n, target=None):
     N = n
     base = [{"message": f"N = {N},   target = {target}", "color": "white"}]
 
-    yield _f([_a("data", data, "Data")], base)
+    yield _f([_a("data", data, "Data", target=target)], base)
 
     # 番兵を末尾に追加
     s = data + [target]
     t = base + [{"message": f"番兵 {target} を末尾 (index {N}) に追加", "color": "orange"}]
-    yield _f([_a("data", s, "Data", hl={N: "yellow"}, watchman=N)], t)
+    yield _f([_a("data", s, "Data", hl={N: "yellow"}, watchman=N, target=target)], t)
 
     i = 0
     while s[i] != target:
         t2 = base + [{"message": f"data[{i}] = {s[i]}   !=   {target}", "color": "lightgreen"}]
-        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), watchman=N)], t2)
+        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), watchman=N, target=target)], t2)
         i += 1
 
     if i >= N:
         t3 = base + [{"message": f"番兵に到達 → Target Not Found!", "color": "red"}]
-        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, "sentinel", "orange"), watchman=N)], t3, finished=True)
+        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, "sentinel", "orange"), watchman=N, target=target)], t3, finished=True)
     else:
         t3 = base + [{"message": f"Found!   index = {i}", "color": "red"}]
         for _ in range(3):
-            yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), watchman=N)], t3)
-            yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), watchman=N)], t3)
-        yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, watchman=N)], t3, finished=True)
+            yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), watchman=N, target=target)], t3)
+            yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), watchman=N, target=target)], t3)
+        yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, watchman=N, target=target)], t3, finished=True)
 
 
 # ---------------------------------------------------------------------------
@@ -136,7 +138,7 @@ def linear_search_sorted(n, target=None):
     N = n
     base = [{"message": f"Sorted,   N = {N},   target = {target}", "color": "white"}]
 
-    yield _f([_a("data", data, "Data (Sorted)")], base)
+    yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
 
     for i in range(N):
         found = (data[i] == target)
@@ -148,20 +150,20 @@ def linear_search_sorted(n, target=None):
         if found:
             t2 = base + [{"message": f"Found!   index = {i}", "color": "red"}]
             for _ in range(3):
-                yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"))], t2)
-                yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"))], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"})], t2, finished=True)
+                yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t2)
+                yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), target=target)], t2)
+            yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, target=target)], t2, finished=True)
             return
         elif over:
-            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"))], t)
+            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t)
             t3 = base + [{"message": f"data[{i}] = {data[i]} > {target} → Not Found!", "color": "red"}]
-            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"})], t3, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, target=target)], t3, finished=True)
             return
 
-        yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"))], t)
+        yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t)
 
     t = base + [{"message": "Target Not Found! (end of array)", "color": "red"}]
-    yield _f([_a("data", data, "Data (Sorted)")], t, finished=True)
+    yield _f([_a("data", data, "Data (Sorted)", target=target)], t, finished=True)
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +177,7 @@ def binary_search(n, target=None):
     N = n
     base = [{"message": f"Sorted,   N = {N},   target = {target}", "color": "white"}]
 
-    yield _f([_a("data", data, "Data (Sorted)")], base)
+    yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
 
     first, last = 0, N - 1
     fills = []
@@ -188,16 +190,16 @@ def binary_search(n, target=None):
         ]
         yield _f([_a("data", data, "Data (Sorted)",
                      hl={center: "yellow", first: "#aaffaa", last: "#aaffaa"},
-                     fills=fills, ptr=_ptr(center, f"? {target}"))], t)
+                     fills=fills, ptr=_ptr(center, f"? {target}"), target=target)], t)
 
         if data[center] == target:
             t2 = base + [{"message": f"Found!   index = {center}", "color": "red"}]
             for _ in range(3):
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "yellow"}, fills=fills,
-                             ptr=_ptr(center, f"== {target}"))], t2)
+                             ptr=_ptr(center, f"== {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills,
-                             ptr=_ptr(center, f"== {target}", "red"))], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills)], t2, finished=True)
+                             ptr=_ptr(center, f"== {target}", "red"), target=target)], t2)
+            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True)
             return
         elif target < data[center]:
             t3 = base + [{"message": f"{target} < data[{center}]={data[center]} → 左半分を探索", "color": "orange"}]
@@ -207,10 +209,10 @@ def binary_search(n, target=None):
             t3 = base + [{"message": f"{target} > data[{center}]={data[center]} → 右半分を探索", "color": "orange"}]
             fills = fills + [{"from": first, "to": center, "color": "#555555"}]
             first = center + 1
-        yield _f([_a("data", data, "Data (Sorted)", fills=fills)], t3)
+        yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t3)
 
     t = base + [{"message": "Target Not Found!", "color": "red"}]
-    yield _f([_a("data", data, "Data (Sorted)", fills=fills)], t, finished=True)
+    yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True)
 
 
 # ---------------------------------------------------------------------------
@@ -224,12 +226,12 @@ def binary_search_recursive(n, target=None):
     N = n
     base = [{"message": f"Sorted,   N = {N},   target = {target}   (Recursive)", "color": "white"}]
 
-    yield _f([_a("data", data, "Data (Sorted)")], base)
+    yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
 
     def rec(first, last, fills, depth):
         if first > last:
             t = base + [{"message": f"depth={depth}: first={first} > last={last} → Not Found!", "color": "red"}]
-            yield _f([_a("data", data, "Data (Sorted)", fills=fills)], t, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True)
             return
 
         center = (first + last) // 2
@@ -239,25 +241,25 @@ def binary_search_recursive(n, target=None):
         ]
         yield _f([_a("data", data, "Data (Sorted)",
                      hl={center: "yellow", first: "#aaffaa", last: "#aaffaa"},
-                     fills=fills, ptr=_ptr(center, f"? {target}"))], t)
+                     fills=fills, ptr=_ptr(center, f"? {target}"), target=target)], t)
 
         if data[center] == target:
             t2 = base + [{"message": f"Found!   depth={depth},   index = {center}", "color": "red"}]
             for _ in range(3):
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "yellow"}, fills=fills,
-                             ptr=_ptr(center, f"== {target}"))], t2)
+                             ptr=_ptr(center, f"== {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills,
-                             ptr=_ptr(center, f"== {target}", "red"))], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills)], t2, finished=True)
+                             ptr=_ptr(center, f"== {target}", "red"), target=target)], t2)
+            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True)
         elif target < data[center]:
             t3 = base + [{"message": f"depth={depth}: {target} < data[{center}] → 左へ再帰", "color": "orange"}]
             new_fills = fills + [{"from": center, "to": last, "color": "#555555"}]
-            yield _f([_a("data", data, "Data (Sorted)", fills=new_fills)], t3)
+            yield _f([_a("data", data, "Data (Sorted)", fills=new_fills, target=target)], t3)
             yield from rec(first, center - 1, new_fills, depth + 1)
         else:
             t3 = base + [{"message": f"depth={depth}: {target} > data[{center}] → 右へ再帰", "color": "orange"}]
             new_fills = fills + [{"from": first, "to": center, "color": "#555555"}]
-            yield _f([_a("data", data, "Data (Sorted)", fills=new_fills)], t3)
+            yield _f([_a("data", data, "Data (Sorted)", fills=new_fills, target=target)], t3)
             yield from rec(center + 1, last, new_fills, depth + 1)
 
     yield from rec(0, N - 1, [], 0)

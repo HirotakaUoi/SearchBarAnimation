@@ -1,5 +1,5 @@
 /**
- * array_canvas.js  –  array1d オブジェクト描画ユーティリティ
+ * array_canvas.js  –  array1d 縦棒グラフ描画ユーティリティ
  *
  * フレーム形式:
  *   { objects: [array1d, ...], texts: [{message, color}, ...], finished: bool }
@@ -7,7 +7,9 @@
  * array1d オブジェクト:
  *   { id, type:"array1d", values, label,
  *     highlights: {"i": color}, fills: [{from,to,color}],
- *     pointer: {index,label,color}|null, watchman_index: int|null }
+ *     pointer: {index,label,color}|null,
+ *     watchman_index: int|null,
+ *     target: int|null }   ← target が設定されると左端に参照バーを表示
  */
 
 "use strict";
@@ -23,7 +25,6 @@ class ArrayCanvas {
   get ch() { return this.canvas.height; }
 
   // ── メイン描画 ────────────────────────────────────────────────────
-  /** フレームを描画する */
   draw(frame) {
     const { objects = [], texts = [], finished = false } = frame;
     const ctx = this.ctx;
@@ -33,7 +34,7 @@ class ArrayCanvas {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, this.cw, this.ch);
 
-    // テキストエリア (キャンバス上部)
+    // テキストエリア (上部)
     const TEXT_LINE_H = 20;
     const textH = texts.length > 0 ? texts.length * TEXT_LINE_H + 6 : 2;
 
@@ -46,7 +47,7 @@ class ArrayCanvas {
     }
     ctx.restore();
 
-    // オブジェクトエリア (テキストの下)
+    // オブジェクトエリア
     const objAreaTop = textH;
     const objAreaH   = this.ch - objAreaTop;
     const nObjs      = objects.length;
@@ -73,12 +74,13 @@ class ArrayCanvas {
     }
   }
 
-  // ── array1d 描画 ──────────────────────────────────────────────────
+  // ── array1d 縦棒グラフ描画 ────────────────────────────────────────
   _drawArray1d(obj, areaY, areaH) {
     const {
       values = [], label = "",
       highlights = {}, fills = [],
       pointer = null, watchman_index = null,
+      target = null,
     } = obj;
     const n = values.length;
     if (n === 0) return;
@@ -87,105 +89,137 @@ class ArrayCanvas {
     const cw  = this.cw;
 
     // レイアウト定数
-    const PAD_L   = 8, PAD_R = 8;
-    const LABEL_H = label ? 14 : 0;
-    const PTR_H   = 28;   // セル上部のポインタ矢印エリア
-    const IDX_H   = 14;   // セル下部のインデックスラベルエリア
-    const GAP     = 2;
+    const PAD_T = 22;   // バー上部の余白 (ポインタラベル用)
+    const PAD_B = 16;   // バー下部の余白 (インデックスラベル用)
+    const PAD_L = 8;
+    const PAD_R = 8;
 
-    const totalFixed = LABEL_H + PTR_H + IDX_H + GAP * 2;
-    const cellW = (cw - PAD_L - PAD_R) / n;
-    const cellH = Math.max(16, Math.min(areaH - totalFixed, cellW * 1.4, 54));
+    // 参照バーエリア (target があるとき左端に確保)
+    const HAS_TARGET = target !== null;
+    const REF_W   = HAS_TARGET ? 30 : 0;
+    const REF_GAP = HAS_TARGET ? 10 : 0;
 
-    const cellsX = PAD_L;
-    const cellsY = areaY + LABEL_H + GAP + PTR_H
-                   + Math.max(0, (areaH - totalFixed - cellH) / 2);
+    const chartL = PAD_L + REF_W + REF_GAP;
+    const chartR = cw - PAD_R;
+    const chartT = areaY + PAD_T;
+    const chartB = areaY + areaH - PAD_B;
+    const chartH = chartB - chartT;
+    const barW   = (chartR - chartL) / n;
+
+    const dataMax = Math.max(...values, HAS_TARGET ? target : 0, 1);
+    const valToY  = (v) => chartT + chartH * (1 - v / dataMax);
+    const valToH  = (v) => chartH * v / dataMax;
 
     ctx.save();
 
     // ラベル
     if (label) {
       ctx.fillStyle = "#6a8faf";
-      ctx.font      = "11px sans-serif";
+      ctx.font      = "10px sans-serif";
       ctx.textAlign = "left";
       ctx.fillText(label, PAD_L, areaY + 12);
     }
 
-    // フィル（範囲オーバーレイ）— セルの後ろ
+    // ── 参照バー (target) ──
+    if (HAS_TARGET) {
+      const refX = PAD_L;
+      const refY = valToY(target);
+      const refH = valToH(target);
+      const rw   = REF_W - 2;
+
+      // バー本体
+      ctx.fillStyle   = "#1a4a1a";
+      ctx.fillRect(refX + 0.5, refY, rw - 1, refH);
+      ctx.strokeStyle = "#44cc44";
+      ctx.lineWidth   = 1.5;
+      ctx.strokeRect(refX + 0.5, refY + 0.5, rw - 1, refH - 1);
+
+      // 高さが同じことを示す水平の破線ガイド
+      ctx.save();
+      ctx.strokeStyle = "rgba(68, 204, 68, 0.3)";
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([4, 5]);
+      ctx.beginPath();
+      ctx.moveTo(chartL, refY);
+      ctx.lineTo(chartR, refY);
+      ctx.stroke();
+      ctx.restore();
+
+      // 値ラベル (参照バーの上)
+      const rFs = Math.max(7, Math.min(10, REF_W * 0.4));
+      ctx.fillStyle = "#44cc44";
+      ctx.font      = `${rFs}px monospace`;
+      ctx.textAlign = "center";
+      ctx.fillText(String(target), refX + REF_W / 2 - 1, refY - 3);
+    }
+
+    // ── フィル (範囲オーバーレイ: 二分探索で除外済み領域を暗くする) ──
     for (const fill of fills) {
       const from = Math.max(0, fill.from);
       const to   = Math.min(n - 1, fill.to);
-      ctx.globalAlpha = 0.55;
+      ctx.globalAlpha = 0.65;
       ctx.fillStyle   = fill.color;
-      ctx.fillRect(cellsX + from * cellW, cellsY - 1,
-                   (to - from + 1) * cellW, cellH + 2);
+      ctx.fillRect(chartL + from * barW, chartT,
+                   (to - from + 1) * barW, chartH);
       ctx.globalAlpha = 1.0;
     }
 
-    // セル
+    // ── バー ──
+    const showLabel = barW >= 14;
     for (let i = 0; i < n; i++) {
-      const cx         = cellsX + i * cellW;
+      const x = chartL + i * barW;
+      const y = valToY(values[i]);
+      const h = valToH(values[i]);
+
       const isWatchman = (watchman_index === i);
       const hlColor    = highlights[String(i)];
 
-      // 背景
-      ctx.fillStyle = isWatchman ? "#2a1500"
+      // バー色
+      ctx.fillStyle = isWatchman ? "#cc6600"
                     : hlColor    ? hlColor
-                    :              "#1e2d3d";
-      ctx.fillRect(cx + 0.5, cellsY, cellW - 1, cellH);
+                    :              "#4472C4";
+      ctx.fillRect(x + 0.5, y, barW - 1, h);
 
-      // ボーダー
-      ctx.strokeStyle = isWatchman ? "#ff8800"
-                      : hlColor    ? "#666"
-                      :              "#3a5a7a";
-      ctx.lineWidth = isWatchman ? 2 : 1;
-      ctx.strokeRect(cx + 0.5, cellsY + 0.5, cellW - 1, cellH - 1);
-
-      // 値テキスト
-      const vFs = Math.min(13, cellW * 0.6, cellH * 0.45);
-      if (vFs >= 5) {
-        ctx.fillStyle = isWatchman ? "#ff8800"
-                      : hlColor    ? "#111"
-                      :              "#ccd";
-        ctx.font      = `${vFs}px monospace`;
+      // 値ラベル (バー上)
+      if (showLabel) {
+        const fs = Math.min(11, barW * 0.65);
+        ctx.fillStyle = "#ccc";
+        ctx.font      = `${fs}px sans-serif`;
         ctx.textAlign = "center";
-        ctx.fillText(String(values[i]),
-                     cx + cellW / 2,
-                     cellsY + cellH / 2 + vFs * 0.35);
+        ctx.fillText(String(values[i]), x + barW / 2, y - 2);
       }
     }
 
-    // インデックスラベル（セルの下）
-    if (cellW >= 12) {
-      const iFs = Math.min(9, cellW * 0.45);
+    // ── インデックスラベル (バー下) ──
+    if (barW >= 14) {
+      const iFs = Math.min(9, barW * 0.5);
       ctx.fillStyle = "#4a6080";
       ctx.font      = `${iFs}px sans-serif`;
       ctx.textAlign = "center";
       for (let i = 0; i < n; i++) {
         ctx.fillText(String(i),
-                     cellsX + i * cellW + cellW / 2,
-                     cellsY + cellH + 11);
+                     chartL + i * barW + barW / 2,
+                     chartB + 12);
       }
     }
 
-    // ポインタ矢印（セルの上から下向き）
+    // ── ポインタ矢印 (バー上端に向けて上から下向きに) ──
     if (pointer) {
       const { index, label: pLabel, color: pColor = "#cc00cc" } = pointer;
-      const px        = cellsX + index * cellW + cellW / 2;
-      const tipY      = cellsY - 3;
-      const shaftTopY = cellsY - PTR_H + 4;
-      const shaftBotY = tipY - 7;
+      const px   = chartL + index * barW + barW / 2;
+      const tipY = valToY(values[index]) - 2;  // バー上端の少し上
+      const topY = chartT - 4;                 // 矢印シャフトの根元
 
       ctx.strokeStyle = pColor;
       ctx.lineWidth   = 1.5;
-      if (shaftBotY > shaftTopY + (pLabel ? 12 : 0)) {
+      if (topY + (pLabel ? 12 : 0) < tipY - 7) {
         ctx.beginPath();
-        ctx.moveTo(px, shaftTopY + (pLabel ? 12 : 0));
-        ctx.lineTo(px, shaftBotY);
+        ctx.moveTo(px, topY + (pLabel ? 12 : 0));
+        ctx.lineTo(px, tipY - 7);
         ctx.stroke();
       }
 
-      // 矢じり
+      // 矢じり (下向き三角)
       ctx.fillStyle = pColor;
       ctx.beginPath();
       ctx.moveTo(px,     tipY);
@@ -194,24 +228,25 @@ class ArrayCanvas {
       ctx.closePath();
       ctx.fill();
 
-      // ラベル
+      // ポインタラベル
       if (pLabel) {
-        const lFs = Math.max(7, Math.min(10, cellW * 0.55));
+        const lFs = Math.max(7, Math.min(10, barW * 0.6));
         ctx.fillStyle = pColor;
         ctx.font      = `${lFs}px monospace`;
         ctx.textAlign = "center";
-        ctx.fillText(pLabel, px, shaftTopY + 10);
+        ctx.fillText(pLabel, px, topY + 10);
       }
     }
 
     ctx.restore();
   }
 
-  // ── プレビュー描画（アニメーション開始前） ────────────────────────
-  /** ランダム配列を描画する（開始前のプレビュー用） */
+  // ── プレビュー描画 ────────────────────────────────────────────────
+  /** ランダム配列 + 参照バーのプレビューを描画する */
   drawPreview(numItems) {
     const values = Array.from({ length: numItems },
                                () => Math.floor(Math.random() * 99) + 1);
+    const target = values[Math.floor(Math.random() * numItems)];
     this.draw({
       objects: [{
         id: "preview", type: "array1d",
@@ -221,6 +256,7 @@ class ArrayCanvas {
         fills:          [],
         pointer:        null,
         watchman_index: null,
+        target,
       }],
       texts:    [],
       finished: false,
