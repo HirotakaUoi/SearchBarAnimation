@@ -432,7 +432,7 @@ class ArrayPanel {
 
   // ── スピード変換 ─────────────────────────────────────────────
   _applySpeed(sliderVal) {
-    const speed = Math.round(200 / sliderVal * 10) / 1000;
+    const speed = Math.round(800 / sliderVal * 10) / 1000;
     const mult  = Math.round(sliderVal / 80 * 10) / 10;
     this.el.querySelector(".speed-value").textContent = `×${mult.toFixed(1)}`;
     if (this.client) this.client.setSpeed(speed);

@@ -43,7 +43,7 @@ def get_datasizes():
 class StartParams(BaseModel):
     algorithm_id: int
     num_items:    int   = 16
-    speed:        float = 0.08   # 秒/フレーム
+    speed:        float = 0.10   # 秒/フレーム
     target:       Optional[int] = None   # None = サーバー側で自動生成
 
 
