@@ -262,5 +262,6 @@ class ArrayCanvas {
       texts:    [],
       finished: false,
     });
+    return { values, target };
   }
 }

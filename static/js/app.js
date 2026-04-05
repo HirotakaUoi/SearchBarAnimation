@@ -427,7 +427,7 @@ class ArrayPanel {
     const algoId   = Number(this.el.querySelector(".sel-algo").value);
     const algo     = algorithms.find(a => a.id === algoId);
     const sorted   = !!(algo && algo.meta && algo.meta.sorted);
-    new ArrayCanvas(canvas).drawPreview(numItems, sorted);
+    this._previewCache = new ArrayCanvas(canvas).drawPreview(numItems, sorted);
   }
 
   // ── スピード変換 ─────────────────────────────────────────────
@@ -454,10 +454,14 @@ class ArrayPanel {
 
     let info;
     try {
+      const body = { algorithm_id: algoId, num_items: numItems, speed };
+      if (this._previewCache?.target !== undefined) {
+        body.target = this._previewCache.target;
+      }
       const res = await fetch("/api/start", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ algorithm_id: algoId, num_items: numItems, speed }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
       info = await res.json();
