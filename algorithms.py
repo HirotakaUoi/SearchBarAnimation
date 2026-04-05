@@ -277,4 +277,4 @@ AlgorithmList = [
     ("二分探索 (再帰)",         binary_search_recursive,  {"sorted": True}),
 ]
 
-DataSizeList = [8, 12, 16, 20, 24, 32, 48, 64, 96, 128]
+DataSizeList = [8, 12, 16, 20, 24, 32, 48, 64, 96, 100, 128]
