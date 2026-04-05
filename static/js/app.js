@@ -424,7 +424,10 @@ class ArrayPanel {
 
   _drawPreviewOnCanvas(canvas) {
     const numItems = Number(this.el.querySelector(".sel-size").value) || 16;
-    new ArrayCanvas(canvas).drawPreview(numItems);
+    const algoId   = Number(this.el.querySelector(".sel-algo").value);
+    const algo     = algorithms.find(a => a.id === algoId);
+    const sorted   = !!(algo && algo.meta && algo.meta.sorted);
+    new ArrayCanvas(canvas).drawPreview(numItems, sorted);
   }
 
   // ── スピード変換 ─────────────────────────────────────────────

@@ -272,9 +272,9 @@ def binary_search_recursive(n, target=None):
 AlgorithmList = [
     ("線形探索 (基本)",         linear_search,            {}),
     ("線形探索 (番兵法)",        linear_search_watchman,   {}),
-    ("線形探索 (整列済み配列)",   linear_search_sorted,     {}),
-    ("二分探索 (反復)",         binary_search,            {}),
-    ("二分探索 (再帰)",         binary_search_recursive,  {}),
+    ("線形探索 (整列済み配列)",   linear_search_sorted,     {"sorted": True}),
+    ("二分探索 (反復)",         binary_search,            {"sorted": True}),
+    ("二分探索 (再帰)",         binary_search_recursive,  {"sorted": True}),
 ]
 
 DataSizeList = [8, 12, 16, 20, 24, 32]

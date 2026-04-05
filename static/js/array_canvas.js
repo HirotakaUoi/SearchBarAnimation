@@ -134,13 +134,13 @@ class ArrayCanvas {
       ctx.lineWidth   = 1.5;
       ctx.strokeRect(refX + 0.5, refY + 0.5, rw - 1, refH - 1);
 
-      // 高さが同じことを示す水平の破線ガイド
+      // 高さが同じことを示す水平の破線ガイド (参照バー右辺から延ばす)
       ctx.save();
-      ctx.strokeStyle = "rgba(68, 204, 68, 0.3)";
+      ctx.strokeStyle = "rgba(68, 204, 68, 0.35)";
       ctx.lineWidth   = 1;
       ctx.setLineDash([4, 5]);
       ctx.beginPath();
-      ctx.moveTo(chartL, refY);
+      ctx.moveTo(PAD_L + REF_W, refY);
       ctx.lineTo(chartR, refY);
       ctx.stroke();
       ctx.restore();
@@ -151,17 +151,6 @@ class ArrayCanvas {
       ctx.font      = `${rFs}px monospace`;
       ctx.textAlign = "center";
       ctx.fillText(String(target), refX + REF_W / 2 - 1, refY - 3);
-    }
-
-    // ── フィル (範囲オーバーレイ: 二分探索で除外済み領域を暗くする) ──
-    for (const fill of fills) {
-      const from = Math.max(0, fill.from);
-      const to   = Math.min(n - 1, fill.to);
-      ctx.globalAlpha = 0.65;
-      ctx.fillStyle   = fill.color;
-      ctx.fillRect(chartL + from * barW, chartT,
-                   (to - from + 1) * barW, chartH);
-      ctx.globalAlpha = 1.0;
     }
 
     // ── バー ──
@@ -188,6 +177,17 @@ class ArrayCanvas {
         ctx.textAlign = "center";
         ctx.fillText(String(values[i]), x + barW / 2, y - 2);
       }
+    }
+
+    // ── フィル (バーの上に重ねて除外済み領域を暗くする) ──
+    for (const fill of fills) {
+      const from = Math.max(0, fill.from);
+      const to   = Math.min(n - 1, fill.to);
+      ctx.globalAlpha = 0.78;
+      ctx.fillStyle   = fill.color;
+      ctx.fillRect(chartL + from * barW, chartT,
+                   (to - from + 1) * barW, chartH);
+      ctx.globalAlpha = 1.0;
     }
 
     // ── インデックスラベル (バー下) ──
@@ -243,9 +243,10 @@ class ArrayCanvas {
 
   // ── プレビュー描画 ────────────────────────────────────────────────
   /** ランダム配列 + 参照バーのプレビューを描画する */
-  drawPreview(numItems) {
-    const values = Array.from({ length: numItems },
-                               () => Math.floor(Math.random() * 99) + 1);
+  drawPreview(numItems, sorted = false) {
+    let values = Array.from({ length: numItems },
+                             () => Math.floor(Math.random() * 99) + 1);
+    if (sorted) values.sort((a, b) => a - b);
     const target = values[Math.floor(Math.random() * numItems)];
     this.draw({
       objects: [{
