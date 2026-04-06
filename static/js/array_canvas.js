@@ -245,11 +245,12 @@ class ArrayCanvas {
 
   // ── プレビュー描画 ────────────────────────────────────────────────
   /** ランダム配列 + 参照バーのプレビューを描画する */
-  drawPreview(numItems, sorted = false) {
+  drawPreview(numItems, sorted = false, forcedTarget = null) {
     let values = Array.from({ length: numItems },
                              () => Math.floor(Math.random() * 99) + 1);
     if (sorted) values.sort((a, b) => a - b);
-    const target = values[Math.floor(Math.random() * numItems)];
+    const target = (forcedTarget !== null) ? forcedTarget
+                                           : values[Math.floor(Math.random() * numItems)];
     this.draw({
       objects: [{
         id: "preview", type: "array1d",

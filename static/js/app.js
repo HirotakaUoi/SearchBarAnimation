@@ -80,6 +80,7 @@ function _setupGlobalControls() {
 function applyGlobalToAll() {
   const size        = Number(document.getElementById("global-size").value);
   const speedSlider = Number(document.getElementById("global-speed").value);
+  const targetRaw   = document.getElementById("global-target").value.trim();
 
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;
@@ -87,7 +88,8 @@ function applyGlobalToAll() {
     el.querySelector(".rng-speed").value = speedSlider;
     panel._applySpeed(speedSlider);
     if (!panel.isRunning) {
-      el.querySelector(".sel-size").value = size;
+      el.querySelector(".sel-size").value    = size;
+      el.querySelector(".inp-target").value  = targetRaw;
       panel._drawPreview();
     }
   });
@@ -255,6 +257,10 @@ class ArrayPanel {
         <label>データ数
           <select class="sel-size"></select>
         </label>
+        <label>target
+          <input type="number" class="inp-target" min="0" max="999" placeholder="自動"
+                 style="width:60px" title="探索する値 (空欄=自動)">
+        </label>
         <div class="speed-group">
           <label>速度</label>
           <input type="range" class="rng-speed" min="1" max="200" value="80"
@@ -314,8 +320,9 @@ class ArrayPanel {
       this._applySpeed(Number(ev.target.value));
     });
 
-    q(".sel-algo").addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
-    q(".sel-size").addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
+    q(".sel-algo") .addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
+    q(".sel-size") .addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
+    q(".inp-target").addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
 
     this.el.addEventListener("mousedown", () => this._bringToFront());
 
@@ -427,7 +434,9 @@ class ArrayPanel {
     const algoId   = Number(this.el.querySelector(".sel-algo").value);
     const algo     = algorithms.find(a => a.id === algoId);
     const sorted   = !!(algo && algo.meta && algo.meta.sorted);
-    this._previewCache = new ArrayCanvas(canvas).drawPreview(numItems, sorted);
+    const tRaw     = this.el.querySelector(".inp-target").value.trim();
+    const forced   = tRaw !== "" ? Number(tRaw) : null;
+    this._previewCache = new ArrayCanvas(canvas).drawPreview(numItems, sorted, forced);
   }
 
   // ── スピード変換 ─────────────────────────────────────────────
@@ -454,8 +463,11 @@ class ArrayPanel {
 
     let info;
     try {
+      const tRaw = this.el.querySelector(".inp-target").value.trim();
       const body = { algorithm_id: algoId, num_items: numItems, speed };
-      if (this._previewCache?.target !== undefined) {
+      if (tRaw !== "") {
+        body.target = Number(tRaw);
+      } else if (this._previewCache?.target !== undefined) {
         body.target = this._previewCache.target;
       }
       const res = await fetch("/api/start", {

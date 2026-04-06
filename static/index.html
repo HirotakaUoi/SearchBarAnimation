@@ -34,6 +34,10 @@
       <label>データ数
         <select id="global-size"></select>
       </label>
+      <label>target
+        <input type="number" id="global-target" min="0" max="999" placeholder="自動"
+               style="width:60px" title="探索する値 (空欄=自動)">
+      </label>
       <div class="speed-group">
         <label>速度</label>
         <input type="range" id="global-speed" min="1" max="200" value="80" title="大きいほど速い">
@@ -47,8 +51,8 @@
   <main id="panels-container"></main>
 
   <!-- ===== スクリプト ===== -->
-  <script src="/static/js/array_canvas.js?v=3"></script>
+  <script src="/static/js/array_canvas.js?v=4"></script>
   <script src="/static/js/ws_client.js?v=1"></script>
-  <script src="/static/js/app.js?v=3"></script>
+  <script src="/static/js/app.js?v=4"></script>
 </body>
 </html>
