@@ -266,9 +266,10 @@ class ArrayCanvas {
   /** ランダム配列 + 参照バーのプレビューを描画する */
   drawPreview(numItems, sorted = false, forcedTarget = null, sharedValues = null) {
     // sharedValues が渡された場合はそれを使用（ソートはコピーに対して行う）
+    const maxVal = numItems >= 200 ? 999 : 99;
     let values = sharedValues
       ? [...sharedValues]
-      : Array.from({ length: numItems }, () => Math.floor(Math.random() * 99) + 1);
+      : Array.from({ length: numItems }, () => Math.floor(Math.random() * (maxVal + 1)));
     if (sorted) values.sort((a, b) => a - b);
     const target = (forcedTarget !== null) ? forcedTarget
                                            : values[Math.floor(Math.random() * numItems)];

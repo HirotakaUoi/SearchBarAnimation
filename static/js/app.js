@@ -82,15 +82,17 @@ function applyGlobalToAll() {
   const speedSlider = Number(document.getElementById("global-speed").value);
   let   targetRaw   = document.getElementById("global-target").value.trim();
 
+  const maxVal = size >= 200 ? 999 : 99;
+
   // target が空(自動)のときは1つだけ乱数を生成して全パネルで共有
   if (targetRaw === "") {
-    targetRaw = String(Math.floor(Math.random() * 100));
+    targetRaw = String(Math.floor(Math.random() * (maxVal + 1)));
     document.getElementById("global-target").value = targetRaw;
   }
 
   // データセットを1回だけ生成して全パネルで共有
   const sharedValues = Array.from({ length: size },
-                                   () => Math.floor(Math.random() * 99) + 1);
+                                   () => Math.floor(Math.random() * (maxVal + 1)));
 
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;
