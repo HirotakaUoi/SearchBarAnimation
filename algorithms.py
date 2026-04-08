@@ -27,9 +27,9 @@ from random import randint, random as _rand
 # ヘルパー
 # ---------------------------------------------------------------------------
 
-def _f(objects, texts=None, finished=False):
-    """フレームを作成する。"""
-    return {"objects": objects, "texts": texts or [], "finished": finished}
+def _f(objects, texts=None, finished=False, found=None):
+    """フレームを作成する。found: True=発見, False=未発見, None=通常完了"""
+    return {"objects": objects, "texts": texts or [], "finished": finished, "found": found}
 
 
 def _a(id, values, label="", hl=None, fills=None, ptr=None, watchman=None, target=None):
@@ -63,11 +63,11 @@ def _auto_target(data):
 # 線形探索 (基本)  ─ Liner_Search.demo01 相当
 # ---------------------------------------------------------------------------
 
-def linear_search(n, target=None):
-    data = [randint(0, 99) for _ in range(n)]
+def linear_search(n, target=None, data=None):
+    data = list(data) if data is not None else [randint(0, 99) for _ in range(n)]
     if target is None:
         target = _auto_target(data)
-    N = n
+    N = len(data)
     base = [{"message": f"N = {N},   target = {target}", "color": "white"}]
 
     yield _f([_a("data", data, "Data", target=target)], base)
@@ -83,24 +83,24 @@ def linear_search(n, target=None):
             for _ in range(3):
                 yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), target=target)], t2)
-            yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, target=target)], t2, finished=True)
+            yield _f([_a("data", data, "Data", hl={i: "#ff4444"}, target=target)], t2, finished=True, found=True)
             return
 
         yield _f([_a("data", data, "Data", hl={i: "yellow"}, ptr=ptr, target=target)], t)
 
     t = base + [{"message": "Target Not Found!", "color": "red"}]
-    yield _f([_a("data", data, "Data", target=target)], t, finished=True)
+    yield _f([_a("data", data, "Data", target=target)], t, finished=True, found=False)
 
 
 # ---------------------------------------------------------------------------
 # 線形探索 (番兵法)  ─ Liner_Search.demo02 相当
 # ---------------------------------------------------------------------------
 
-def linear_search_watchman(n, target=None):
-    data = [randint(0, 99) for _ in range(n)]
+def linear_search_watchman(n, target=None, data=None):
+    data = list(data) if data is not None else [randint(0, 99) for _ in range(n)]
     if target is None:
         target = _auto_target(data)
-    N = n
+    N = len(data)
     base = [{"message": f"N = {N},   target = {target}", "color": "white"}]
 
     yield _f([_a("data", data, "Data", target=target)], base)
@@ -118,24 +118,24 @@ def linear_search_watchman(n, target=None):
 
     if i >= N:
         t3 = base + [{"message": f"番兵に到達 → Target Not Found!", "color": "red"}]
-        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, "sentinel", "orange"), watchman=N, target=target)], t3, finished=True)
+        yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, "sentinel", "orange"), watchman=N, target=target)], t3, finished=True, found=False)
     else:
         t3 = base + [{"message": f"Found!   index = {i}", "color": "red"}]
         for _ in range(3):
             yield _f([_a("data", s, "Data", hl={i: "yellow"}, ptr=_ptr(i, f"<=> {target}"), watchman=N, target=target)], t3)
             yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), watchman=N, target=target)], t3)
-        yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, watchman=N, target=target)], t3, finished=True)
+        yield _f([_a("data", s, "Data", hl={i: "#ff4444"}, watchman=N, target=target)], t3, finished=True, found=True)
 
 
 # ---------------------------------------------------------------------------
 # 線形探索 (整列済み配列)  ─ Liner_Search.demo03 相当
 # ---------------------------------------------------------------------------
 
-def linear_search_sorted(n, target=None):
-    data = sorted([randint(0, 99) for _ in range(n)])
+def linear_search_sorted(n, target=None, data=None):
+    data = sorted(data) if data is not None else sorted([randint(0, 99) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
-    N = n
+    N = len(data)
     base = [{"message": f"Sorted,   N = {N},   target = {target}", "color": "white"}]
 
     yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
@@ -152,29 +152,29 @@ def linear_search_sorted(n, target=None):
             for _ in range(3):
                 yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, ptr=_ptr(i, f"== {target}", "red"), target=target)], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, target=target)], t2, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", hl={i: "#ff4444"}, target=target)], t2, finished=True, found=True)
             return
         elif over:
             yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t)
             t3 = base + [{"message": f"data[{i}] = {data[i]} > {target} → Not Found!", "color": "red"}]
-            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, target=target)], t3, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, target=target)], t3, finished=True, found=False)
             return
 
         yield _f([_a("data", data, "Data (Sorted)", hl={i: "yellow"}, ptr=_ptr(i, f">= {target}"), target=target)], t)
 
     t = base + [{"message": "Target Not Found! (end of array)", "color": "red"}]
-    yield _f([_a("data", data, "Data (Sorted)", target=target)], t, finished=True)
+    yield _f([_a("data", data, "Data (Sorted)", target=target)], t, finished=True, found=False)
 
 
 # ---------------------------------------------------------------------------
 # 二分探索 (反復)  ─ Binary_Search.demo01 相当
 # ---------------------------------------------------------------------------
 
-def binary_search(n, target=None):
-    data = sorted([randint(0, 99) for _ in range(n)])
+def binary_search(n, target=None, data=None):
+    data = sorted(data) if data is not None else sorted([randint(0, 99) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
-    N = n
+    N = len(data)
     base = [{"message": f"Sorted,   N = {N},   target = {target}", "color": "white"}]
 
     yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
@@ -199,7 +199,7 @@ def binary_search(n, target=None):
                              ptr=_ptr(center, f"== {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills,
                              ptr=_ptr(center, f"== {target}", "red"), target=target)], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True, found=True)
             return
         elif target < data[center]:
             t3 = base + [{"message": f"{target} < data[{center}]={data[center]} → 左半分を探索", "color": "orange"}]
@@ -212,18 +212,18 @@ def binary_search(n, target=None):
         yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t3)
 
     t = base + [{"message": "Target Not Found!", "color": "red"}]
-    yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True)
+    yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True, found=False)
 
 
 # ---------------------------------------------------------------------------
 # 二分探索 (再帰)  ─ Binary_Search.demo02 相当
 # ---------------------------------------------------------------------------
 
-def binary_search_recursive(n, target=None):
-    data = sorted([randint(0, 99) for _ in range(n)])
+def binary_search_recursive(n, target=None, data=None):
+    data = sorted(data) if data is not None else sorted([randint(0, 99) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
-    N = n
+    N = len(data)
     base = [{"message": f"Sorted,   N = {N},   target = {target}   (Recursive)", "color": "white"}]
 
     yield _f([_a("data", data, "Data (Sorted)", target=target)], base)
@@ -231,7 +231,7 @@ def binary_search_recursive(n, target=None):
     def rec(first, last, fills, depth):
         if first > last:
             t = base + [{"message": f"depth={depth}: first={first} > last={last} → Not Found!", "color": "red"}]
-            yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", fills=fills, target=target)], t, finished=True, found=False)
             return
 
         center = (first + last) // 2
@@ -250,7 +250,7 @@ def binary_search_recursive(n, target=None):
                              ptr=_ptr(center, f"== {target}"), target=target)], t2)
                 yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills,
                              ptr=_ptr(center, f"== {target}", "red"), target=target)], t2)
-            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True)
+            yield _f([_a("data", data, "Data (Sorted)", hl={center: "#ff4444"}, fills=fills, target=target)], t2, finished=True, found=True)
         elif target < data[center]:
             t3 = base + [{"message": f"depth={depth}: {target} < data[{center}] → 左へ再帰", "color": "orange"}]
             new_fills = fills + [{"from": center, "to": last, "color": "#555555"}]

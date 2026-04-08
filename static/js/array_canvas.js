@@ -26,7 +26,7 @@ class ArrayCanvas {
 
   // ── メイン描画 ────────────────────────────────────────────────────
   draw(frame) {
-    const { objects = [], texts = [], finished = false } = frame;
+    const { objects = [], texts = [], finished = false, found = null } = frame;
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.cw, this.ch);
 
@@ -65,13 +65,32 @@ class ArrayCanvas {
     // 完了オーバーレイ
     if (finished) {
       ctx.save();
-      ctx.fillStyle = "rgba(0,0,0,.6)";
+      ctx.fillStyle = "rgba(0,0,0,.55)";
       ctx.fillRect(0, 0, this.cw, this.ch);
-      const fs = Math.min(40, this.cw / 8);
-      ctx.fillStyle = "#FFD700";
-      ctx.font      = `bold ${fs}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.fillText("完了!", this.cw / 2, this.ch / 2 + fs * 0.35);
+      const fs = Math.min(36, this.cw / 8);
+      if (found === true) {
+        // 発見 → 緑
+        ctx.fillStyle = "rgba(0,80,0,.75)";
+        ctx.fillRect(0, this.ch / 2 - fs * 1.2, this.cw, fs * 2.4);
+        ctx.fillStyle = "#44ff88";
+        ctx.font      = `bold ${fs}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("Found !", this.cw / 2, this.ch / 2 + fs * 0.38);
+      } else if (found === false) {
+        // 未発見 → 赤
+        ctx.fillStyle = "rgba(80,0,0,.75)";
+        ctx.fillRect(0, this.ch / 2 - fs * 1.2, this.cw, fs * 2.4);
+        ctx.fillStyle = "#ff6666";
+        ctx.font      = `bold ${fs}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("Not Found", this.cw / 2, this.ch / 2 + fs * 0.38);
+      } else {
+        // 通常完了（ソート等）→ 金
+        ctx.fillStyle = "#FFD700";
+        ctx.font      = `bold ${fs}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("完了!", this.cw / 2, this.ch / 2 + fs * 0.35);
+      }
       ctx.restore();
     }
   }

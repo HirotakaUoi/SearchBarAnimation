@@ -500,6 +500,9 @@ class ArrayPanel {
       } else if (this._previewCache?.target !== undefined) {
         body.target = this._previewCache.target;
       }
+      if (this._previewCache?.values) {
+        body.data = this._previewCache.values;
+      }
       const res = await fetch("/api/start", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },

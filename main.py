@@ -44,7 +44,8 @@ class StartParams(BaseModel):
     algorithm_id: int
     num_items:    int   = 16
     speed:        float = 0.10   # 秒/フレーム
-    target:       Optional[int] = None   # None = サーバー側で自動生成
+    target:       Optional[int] = None        # None = サーバー側で自動生成
+    data:         Optional[list[int]] = None  # None = サーバー側で乱数生成
 
 
 @app.post("/api/start")
@@ -53,7 +54,7 @@ def start_session(params: StartParams):
         return JSONResponse({"error": "invalid algorithm_id"}, status_code=400)
 
     algo_name, algo_fn, algo_meta = AlgorithmList[params.algorithm_id]
-    generator = algo_fn(params.num_items, params.target)
+    generator = algo_fn(params.num_items, params.target, params.data)
 
     session_id = str(uuid.uuid4())
     sessions[session_id] = {
