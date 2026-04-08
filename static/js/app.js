@@ -86,13 +86,13 @@ function applyGlobalToAll() {
 
   // target が空(自動)のときは1つだけ乱数を生成して全パネルで共有
   if (targetRaw === "") {
-    targetRaw = String(Math.floor(Math.random() * (maxVal + 1)));
+    targetRaw = String(Math.floor(Math.random() * maxVal) + 1);
     document.getElementById("global-target").value = targetRaw;
   }
 
   // データセットを1回だけ生成して全パネルで共有
   const sharedValues = Array.from({ length: size },
-                                   () => Math.floor(Math.random() * (maxVal + 1)));
+                                   () => Math.floor(Math.random() * maxVal) + 1);
 
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;

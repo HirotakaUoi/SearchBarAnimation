@@ -269,7 +269,7 @@ class ArrayCanvas {
     const maxVal = numItems >= 200 ? 999 : 99;
     let values = sharedValues
       ? [...sharedValues]
-      : Array.from({ length: numItems }, () => Math.floor(Math.random() * (maxVal + 1)));
+      : Array.from({ length: numItems }, () => Math.floor(Math.random() * maxVal) + 1);
     if (sorted) values.sort((a, b) => a - b);
     const target = (forcedTarget !== null) ? forcedTarget
                                            : values[Math.floor(Math.random() * numItems)];

@@ -61,7 +61,7 @@ def _auto_target(data):
     """70% の確率でデータ内の値、30% で範囲外の値を返す。"""
     if _rand() < 0.7:
         return data[randint(0, len(data) - 1)]
-    return randint(0, _max_val(len(data)))
+    return randint(1, _max_val(len(data)))
 
 
 # ---------------------------------------------------------------------------
@@ -69,7 +69,7 @@ def _auto_target(data):
 # ---------------------------------------------------------------------------
 
 def linear_search(n, target=None, data=None):
-    data = list(data) if data is not None else [randint(0, _max_val(n)) for _ in range(n)]
+    data = list(data) if data is not None else [randint(1, _max_val(n)) for _ in range(n)]
     if target is None:
         target = _auto_target(data)
     N = len(data)
@@ -102,7 +102,7 @@ def linear_search(n, target=None, data=None):
 # ---------------------------------------------------------------------------
 
 def linear_search_watchman(n, target=None, data=None):
-    data = list(data) if data is not None else [randint(0, _max_val(n)) for _ in range(n)]
+    data = list(data) if data is not None else [randint(1, _max_val(n)) for _ in range(n)]
     if target is None:
         target = _auto_target(data)
     N = len(data)
@@ -137,7 +137,7 @@ def linear_search_watchman(n, target=None, data=None):
 # ---------------------------------------------------------------------------
 
 def linear_search_sorted(n, target=None, data=None):
-    data = sorted(data) if data is not None else sorted([randint(0, _max_val(n)) for _ in range(n)])
+    data = sorted(data) if data is not None else sorted([randint(1, _max_val(n)) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
     N = len(data)
@@ -176,7 +176,7 @@ def linear_search_sorted(n, target=None, data=None):
 # ---------------------------------------------------------------------------
 
 def binary_search(n, target=None, data=None):
-    data = sorted(data) if data is not None else sorted([randint(0, _max_val(n)) for _ in range(n)])
+    data = sorted(data) if data is not None else sorted([randint(1, _max_val(n)) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
     N = len(data)
@@ -225,7 +225,7 @@ def binary_search(n, target=None, data=None):
 # ---------------------------------------------------------------------------
 
 def binary_search_recursive(n, target=None, data=None):
-    data = sorted(data) if data is not None else sorted([randint(0, _max_val(n)) for _ in range(n)])
+    data = sorted(data) if data is not None else sorted([randint(1, _max_val(n)) for _ in range(n)])
     if target is None:
         target = _auto_target(data)
     N = len(data)
