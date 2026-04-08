@@ -80,16 +80,22 @@ function _setupGlobalControls() {
 function applyGlobalToAll() {
   const size        = Number(document.getElementById("global-size").value);
   const speedSlider = Number(document.getElementById("global-speed").value);
-  const targetRaw   = document.getElementById("global-target").value.trim();
+  let   targetRaw   = document.getElementById("global-target").value.trim();
+
+  // target が空(自動)のときは1つだけ乱数を生成して全パネルで共有
+  if (targetRaw === "") {
+    targetRaw = String(Math.floor(Math.random() * 100));
+    document.getElementById("global-target").value = targetRaw;
+  }
 
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;
     if (!panel) return;
-    el.querySelector(".rng-speed").value = speedSlider;
+    el.querySelector(".rng-speed").value   = speedSlider;
     panel._applySpeed(speedSlider);
     if (!panel.isRunning) {
-      el.querySelector(".sel-size").value    = size;
-      el.querySelector(".inp-target").value  = targetRaw;
+      el.querySelector(".sel-size").value   = size;
+      el.querySelector(".inp-target").value = targetRaw;
       panel._drawPreview();
     }
   });
