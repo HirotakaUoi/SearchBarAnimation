@@ -88,6 +88,10 @@ function applyGlobalToAll() {
     document.getElementById("global-target").value = targetRaw;
   }
 
+  // データセットを1回だけ生成して全パネルで共有
+  const sharedValues = Array.from({ length: size },
+                                   () => Math.floor(Math.random() * 99) + 1);
+
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;
     if (!panel) return;
@@ -96,7 +100,7 @@ function applyGlobalToAll() {
     if (!panel.isRunning) {
       el.querySelector(".sel-size").value   = size;
       el.querySelector(".inp-target").value = targetRaw;
-      panel._drawPreview();
+      panel._applySharedPreview(sharedValues, targetRaw);
     }
   });
 }
@@ -433,6 +437,26 @@ class ArrayPanel {
       canvas.height = h;
     }
     this._drawPreviewOnCanvas(canvas);
+  }
+
+  /** 全パネル一括適用用: 外部から渡した共有データでプレビューを描画 */
+  _applySharedPreview(sharedValues, targetRaw) {
+    const wrapper = this.el.querySelector(".canvas-wrapper");
+    const canvas  = this.el.querySelector(".array-canvas");
+    const w = wrapper.clientWidth;
+    const h = wrapper.clientHeight || Math.round(w * 0.55);
+    if (w <= 0) return;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+    const algoId = Number(this.el.querySelector(".sel-algo").value);
+    const algo   = algorithms.find(a => a.id === algoId);
+    const sorted = !!(algo && algo.meta && algo.meta.sorted);
+    const forced = targetRaw !== "" ? Number(targetRaw) : null;
+    this._previewCache = new ArrayCanvas(canvas).drawPreview(
+      sharedValues.length, sorted, forced, sharedValues
+    );
   }
 
   _drawPreviewOnCanvas(canvas) {
