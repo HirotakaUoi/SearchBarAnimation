@@ -1,3 +1,3 @@
 #!/bin/sh
 cd "$(dirname "$0")"
-exec /usr/bin/python3 -m uvicorn main:app --port 8000
+exec /usr/bin/python3 -m uvicorn main:app --port 8004

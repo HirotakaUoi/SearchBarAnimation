@@ -14,6 +14,23 @@
 
 "use strict";
 
+// ---------------------------------------------------------------------------
+// カラーテーマ (canvas 背景・ラベル色のみ)
+// ---------------------------------------------------------------------------
+const AC_THEMES = {
+  dark:     { canvasBg: "#0d1117",  valueLabelColor: "#ccc",  indexLabelColor: "#4a6080",
+              foundCellBg: "#1a4a1a", foundCellText: "#44cc44" },
+  bright:   { canvasBg: "#f0f4ff",  valueLabelColor: "#334",  indexLabelColor: "#668",
+              foundCellBg: "#b8f0b8", foundCellText: "#005500" },
+  hc:       { canvasBg: "#000000",  valueLabelColor: "#fff",  indexLabelColor: "#888",
+              foundCellBg: "#003300", foundCellText: "#00ff66" },
+  hcbright: { canvasBg: "#ffffff",  valueLabelColor: "#111",  indexLabelColor: "#445",
+              foundCellBg: "#a8eea8", foundCellText: "#003300" },
+};
+let _acThemeKey = "dark";
+function _acTheme() { return AC_THEMES[_acThemeKey] ?? AC_THEMES.dark; }
+function setCanvasTheme(k) { _acThemeKey = k; }
+
 class ArrayCanvas {
   /** @param {HTMLCanvasElement} canvas */
   constructor(canvas) {
@@ -31,7 +48,7 @@ class ArrayCanvas {
     ctx.clearRect(0, 0, this.cw, this.ch);
 
     // 背景
-    ctx.fillStyle = "#0d1117";
+    ctx.fillStyle = _acTheme().canvasBg;
     ctx.fillRect(0, 0, this.cw, this.ch);
 
     // オブジェクトエリア (常にキャンバス全体を使う)
@@ -149,9 +166,9 @@ class ArrayCanvas {
       const rw   = REF_W - 2;
 
       // バー本体
-      ctx.fillStyle   = "#1a4a1a";
+      ctx.fillStyle   = _acTheme().foundCellBg;
       ctx.fillRect(refX + 0.5, refY, rw - 1, refH);
-      ctx.strokeStyle = "#44cc44";
+      ctx.strokeStyle = _acTheme().foundCellText;
       ctx.lineWidth   = 1.5;
       ctx.strokeRect(refX + 0.5, refY + 0.5, rw - 1, refH - 1);
 
@@ -168,7 +185,7 @@ class ArrayCanvas {
 
       // 値ラベル (参照バーの上)
       const rFs = Math.max(7, Math.min(10, REF_W * 0.4));
-      ctx.fillStyle = "#44cc44";
+      ctx.fillStyle = _acTheme().foundCellText;
       ctx.font      = `${rFs}px monospace`;
       ctx.textAlign = "center";
       ctx.fillText(String(target), refX + REF_W / 2 - 1, refY - 3);
@@ -193,7 +210,7 @@ class ArrayCanvas {
       // 値ラベル (バー上)
       if (showLabel) {
         const fs = Math.min(11, barW * 0.65);
-        ctx.fillStyle = "#ccc";
+        ctx.fillStyle = _acTheme().valueLabelColor;
         ctx.font      = `${fs}px sans-serif`;
         ctx.textAlign = "center";
         ctx.fillText(String(values[i]), x + barW / 2, y - 2);
@@ -214,7 +231,7 @@ class ArrayCanvas {
     // ── インデックスラベル (バー下) ──
     if (barW >= 14) {
       const iFs = Math.min(9, barW * 0.5);
-      ctx.fillStyle = "#4a6080";
+      ctx.fillStyle = _acTheme().indexLabelColor;
       ctx.font      = `${iFs}px sans-serif`;
       ctx.textAlign = "center";
       for (let i = 0; i < n; i++) {

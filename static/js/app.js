@@ -42,6 +42,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   await loadMeta();
   _setupGlobalControls();
   _setupZoomControls();
+  _setupThemeControls();
   document.getElementById("btn-add-panel")   .addEventListener("click", addPanel);
   document.getElementById("btn-start-all")   .addEventListener("click", startAll);
   document.getElementById("btn-pause-all")   .addEventListener("click", pauseAll);
@@ -125,6 +126,31 @@ function _setupZoomControls() {
     e.preventDefault();
     _applyZoom(zoomLevel + (e.deltaY < 0 ? 0.1 : -0.1));
   }, { passive: false });
+}
+
+// ===== テーマ切替 ==================================================
+
+function _applyTheme(key) {
+  document.body.dataset.theme = key;
+  setCanvasTheme(key);
+  document.querySelectorAll(".theme-btn").forEach(b => {
+    b.classList.toggle("theme-active", b.dataset.th === key);
+  });
+  document.querySelectorAll(".panel").forEach(el => {
+    const panel = el._panel;
+    if (!panel) return;
+    if (panel.isRunning && panel.arrayCanvas && panel._lastFrame) {
+      panel.arrayCanvas.draw(panel._lastFrame);
+    } else {
+      panel._drawPreview();
+    }
+  });
+}
+
+function _setupThemeControls() {
+  document.querySelectorAll(".theme-btn").forEach(btn => {
+    btn.addEventListener("click", () => _applyTheme(btn.dataset.th));
+  });
 }
 
 // ===== コンテナサイズ更新 ==========================================

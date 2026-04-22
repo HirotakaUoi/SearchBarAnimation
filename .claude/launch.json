@@ -2,9 +2,15 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "array-animation",
-      "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["-m", "uvicorn", "main:app", "--port", "8004"],
+      "name": "SearchBarAnimation",
+      "runtimeExecutable": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "main:app",
+        "--port",
+        "8004"
+      ],
       "port": 8004
     }
   ]
