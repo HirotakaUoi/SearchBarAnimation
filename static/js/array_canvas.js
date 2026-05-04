@@ -19,13 +19,17 @@
 // ---------------------------------------------------------------------------
 const AC_THEMES = {
   dark:     { canvasBg: "#0d1117",  valueLabelColor: "#ccc",  indexLabelColor: "#4a6080",
-              foundCellBg: "#1a4a1a", foundCellText: "#44cc44" },
+              foundCellBg: "#1a4a1a", foundCellText: "#44cc44",
+              textOverlay: "rgba(10,14,26,0.78)" },
   bright:   { canvasBg: "#f0f4ff",  valueLabelColor: "#334",  indexLabelColor: "#668",
-              foundCellBg: "#b8f0b8", foundCellText: "#005500" },
+              foundCellBg: "#b8f0b8", foundCellText: "#005500",
+              textOverlay: "rgba(10,20,40,0.88)" },
   hc:       { canvasBg: "#000000",  valueLabelColor: "#fff",  indexLabelColor: "#888",
-              foundCellBg: "#003300", foundCellText: "#00ff66" },
+              foundCellBg: "#003300", foundCellText: "#00ff66",
+              textOverlay: "rgba(0,0,0,0.90)" },
   hcbright: { canvasBg: "#ffffff",  valueLabelColor: "#111",  indexLabelColor: "#445",
-              foundCellBg: "#a8eea8", foundCellText: "#003300" },
+              foundCellBg: "#a8eea8", foundCellText: "#003300",
+              textOverlay: "rgba(10,20,40,0.88)" },
 };
 let _acThemeKey = "dark";
 function _acTheme() { return AC_THEMES[_acThemeKey] ?? AC_THEMES.dark; }
@@ -68,7 +72,7 @@ class ArrayCanvas {
       const pad = 6;
       const boxH = texts.length * TEXT_LINE_H + pad * 2;
       ctx.save();
-      ctx.fillStyle = "rgba(10, 14, 26, 0.78)";
+      ctx.fillStyle = _acTheme().textOverlay;
       ctx.fillRect(0, 0, this.cw, boxH);
       ctx.font = "13px monospace";
       for (let i = 0; i < texts.length; i++) {
