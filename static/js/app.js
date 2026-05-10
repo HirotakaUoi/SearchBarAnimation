@@ -329,6 +329,7 @@ class ArrayPanel {
         <span class="status-state">待機中</span>
         <span class="status-frames">フレーム: 0</span>
       </div>
+      <div class="resize-handle" title="リサイズ"></div>
     `;
   }
 
@@ -374,19 +375,21 @@ class ArrayPanel {
     ro.observe(this.el);
     ro.observe(q(".canvas-wrapper"));
 
-    // フリードラッグ
+    // フリードラッグ（マウス＋タッチ対応）
     const handle = q(".drag-handle");
-    handle.addEventListener("mousedown", (e) => {
-      e.preventDefault();
+    const startDrag = (e) => {
+      if (e.cancelable) e.preventDefault();
       this._bringToFront();
       handle.style.cursor = "grabbing";
-      let prevX = e.clientX, prevY = e.clientY;
+      const pt = e.touches ? e.touches[0] : e;
+      let prevX = pt.clientX, prevY = pt.clientY;
 
       const onMove = (mv) => {
-        const dx = (mv.clientX - prevX) / zoomLevel;
-        const dy = (mv.clientY - prevY) / zoomLevel;
-        prevX = mv.clientX;
-        prevY = mv.clientY;
+        const p = mv.touches ? mv.touches[0] : mv;
+        const dx = (p.clientX - prevX) / zoomLevel;
+        const dy = (p.clientY - prevY) / zoomLevel;
+        prevX = p.clientX;
+        prevY = p.clientY;
 
         let newLeft = (parseFloat(this.el.style.left) || 0) + dx;
         let newTop  = (parseFloat(this.el.style.top)  || 0) + dy;
@@ -407,10 +410,45 @@ class ArrayPanel {
         handle.style.cursor = "";
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup",   onUp);
+        document.removeEventListener("touchmove", onMove);
+        document.removeEventListener("touchend",  onUp);
       };
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup",   onUp);
-    });
+      document.addEventListener("touchmove", onMove, { passive: false });
+      document.addEventListener("touchend",  onUp);
+    };
+    handle.addEventListener("mousedown",  startDrag);
+    handle.addEventListener("touchstart", startDrag, { passive: false });
+
+    // カスタムリサイズ（CSS resize は Desktop のみ; タッチ対応の JS リサイズを追加）
+    const resizeEl = q(".resize-handle");
+    const startResize = (e) => {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      const pt = e.touches ? e.touches[0] : e;
+      let prevX = pt.clientX, prevY = pt.clientY;
+      const onMove = (mv) => {
+        const p = mv.touches ? mv.touches[0] : mv;
+        const dx = (p.clientX - prevX) / zoomLevel;
+        const dy = (p.clientY - prevY) / zoomLevel;
+        prevX = p.clientX; prevY = p.clientY;
+        this.el.style.width  = Math.max(280, this.el.offsetWidth  + dx) + "px";
+        this.el.style.height = Math.max(340, this.el.offsetHeight + dy) + "px";
+      };
+      const onUp = () => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup",   onUp);
+        document.removeEventListener("touchmove", onMove);
+        document.removeEventListener("touchend",  onUp);
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup",   onUp);
+      document.addEventListener("touchmove", onMove, { passive: false });
+      document.addEventListener("touchend",  onUp);
+    };
+    resizeEl.addEventListener("mousedown",  startResize);
+    resizeEl.addEventListener("touchstart", startResize, { passive: false });
   }
 
   // ── 最前面へ ──────────────────────────────────────────────────

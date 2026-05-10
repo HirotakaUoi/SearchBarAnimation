@@ -173,9 +173,22 @@ header h1 {
   user-select: none;
   line-height: 1;
   flex-shrink: 0;
+  touch-action: none;   /* タッチドラッグ有効化 */
 }
 .drag-handle:hover { color: #90caf9; }
 .drag-handle:active { cursor: grabbing; }
+
+/* タッチリサイズハンドル（モバイル対応） */
+.panel .resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  cursor: se-resize;
+  z-index: 10;
+  touch-action: none;
+}
 
 /* ドラッグ中・ドロップ対象のスタイル */
 .panel.dragging {
