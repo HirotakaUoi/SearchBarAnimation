@@ -391,20 +391,8 @@ class ArrayPanel {
         const dy = (p.clientY - prevY) / zoomLevel;
         prevX = p.clientX;
         prevY = p.clientY;
-
-        let newLeft = (parseFloat(this.el.style.left) || 0) + dx;
-        let newTop  = (parseFloat(this.el.style.top)  || 0) + dy;
-
-        const ref = _getTopLeftPanel(this.el);
-        if (ref) {
-          const rL = ref.offsetLeft, rT = ref.offsetTop;
-          const rR = rL + ref.offsetWidth, rB = rT + ref.offsetHeight;
-          const cW = this.el.offsetWidth,   cH = this.el.offsetHeight;
-          newLeft = _snapValue(newLeft, [rL, rR - cW, rR + SNAP_GAP, rL - cW - SNAP_GAP], SNAP_THRESHOLD);
-          newTop  = _snapValue(newTop,  [rT, rB - cH, rB + SNAP_GAP, rT - cH - SNAP_GAP], SNAP_THRESHOLD);
-        }
-        this.el.style.left = newLeft + "px";
-        this.el.style.top  = newTop  + "px";
+        this.el.style.left = ((parseFloat(this.el.style.left) || 0) + dx) + "px";
+        this.el.style.top  = ((parseFloat(this.el.style.top)  || 0) + dy) + "px";
         _updateContainerSize();
       };
       const onUp = () => {
@@ -413,6 +401,18 @@ class ArrayPanel {
         document.removeEventListener("mouseup",   onUp);
         document.removeEventListener("touchmove", onMove);
         document.removeEventListener("touchend",  onUp);
+        // リリース時にスナップ適用（ドラッグ中は吸着させない）
+        const ref = _getTopLeftPanel(this.el);
+        if (ref) {
+          const rL = ref.offsetLeft, rT = ref.offsetTop;
+          const rR = rL + ref.offsetWidth, rB = rT + ref.offsetHeight;
+          const cW = this.el.offsetWidth,   cH = this.el.offsetHeight;
+          this.el.style.left = _snapValue(parseFloat(this.el.style.left) || 0,
+            [rL, rR - cW, rR + SNAP_GAP, rL - cW - SNAP_GAP], SNAP_THRESHOLD) + "px";
+          this.el.style.top  = _snapValue(parseFloat(this.el.style.top)  || 0,
+            [rT, rB - cH, rB + SNAP_GAP, rT - cH - SNAP_GAP], SNAP_THRESHOLD) + "px";
+          _updateContainerSize();
+        }
       };
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup",   onUp);
