@@ -377,30 +377,27 @@ class ArrayPanel {
 
     // フリードラッグ（マウス＋タッチ対応）
     const handle = q(".drag-handle");
-    const startDrag = (e) => {
-      if (e.cancelable) e.preventDefault();
+    // ── ドラッグ (Pointer Events) ────────────────────────────────
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
       this._bringToFront();
       handle.style.cursor = "grabbing";
-      const pt = e.touches ? e.touches[0] : e;
-      let prevX = pt.clientX, prevY = pt.clientY;
+      let prevX = e.clientX, prevY = e.clientY;
 
       const onMove = (mv) => {
-        if (mv.cancelable) mv.preventDefault();
-        const p = mv.touches ? mv.touches[0] : mv;
-        const dx = (p.clientX - prevX) / zoomLevel;
-        const dy = (p.clientY - prevY) / zoomLevel;
-        prevX = p.clientX;
-        prevY = p.clientY;
+        const dx = (mv.clientX - prevX) / zoomLevel;
+        const dy = (mv.clientY - prevY) / zoomLevel;
+        prevX = mv.clientX; prevY = mv.clientY;
         this.el.style.left = ((parseFloat(this.el.style.left) || 0) + dx) + "px";
         this.el.style.top  = ((parseFloat(this.el.style.top)  || 0) + dy) + "px";
         _updateContainerSize();
       };
       const onUp = () => {
         handle.style.cursor = "";
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup",   onUp);
-        document.removeEventListener("touchmove", onMove);
-        document.removeEventListener("touchend",  onUp);
+        handle.removeEventListener("pointermove",   onMove);
+        handle.removeEventListener("pointerup",     onUp);
+        handle.removeEventListener("pointercancel", onUp);
         // リリース時にスナップ適用（ドラッグ中は吸着させない）
         const ref = _getTopLeftPanel(this.el);
         if (ref) {
@@ -414,43 +411,35 @@ class ArrayPanel {
           _updateContainerSize();
         }
       };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup",   onUp);
-      document.addEventListener("touchmove", onMove, { passive: false });
-      document.addEventListener("touchend",  onUp);
-    };
-    handle.addEventListener("mousedown",  startDrag);
-    handle.addEventListener("touchstart", startDrag, { passive: false });
+      handle.addEventListener("pointermove",   onMove);
+      handle.addEventListener("pointerup",     onUp);
+      handle.addEventListener("pointercancel", onUp);
+    });
 
-    // カスタムリサイズ（CSS resize は Desktop のみ; タッチ対応の JS リサイズを追加）
+    // ── リサイズ (Pointer Events) ────────────────────────────────
     const resizeEl = q(".resize-handle");
-    const startResize = (e) => {
-      if (e.cancelable) e.preventDefault();
+    resizeEl.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      const pt = e.touches ? e.touches[0] : e;
-      let prevX = pt.clientX, prevY = pt.clientY;
+      resizeEl.setPointerCapture(e.pointerId);
+      let prevX = e.clientX, prevY = e.clientY;
+
       const onMove = (mv) => {
-        if (mv.cancelable) mv.preventDefault();
-        const p = mv.touches ? mv.touches[0] : mv;
-        const dx = (p.clientX - prevX) / zoomLevel;
-        const dy = (p.clientY - prevY) / zoomLevel;
-        prevX = p.clientX; prevY = p.clientY;
+        const dx = (mv.clientX - prevX) / zoomLevel;
+        const dy = (mv.clientY - prevY) / zoomLevel;
+        prevX = mv.clientX; prevY = mv.clientY;
         this.el.style.width  = Math.max(280, this.el.offsetWidth  + dx) + "px";
         this.el.style.height = Math.max(340, this.el.offsetHeight + dy) + "px";
       };
       const onUp = () => {
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup",   onUp);
-        document.removeEventListener("touchmove", onMove);
-        document.removeEventListener("touchend",  onUp);
+        resizeEl.removeEventListener("pointermove",   onMove);
+        resizeEl.removeEventListener("pointerup",     onUp);
+        resizeEl.removeEventListener("pointercancel", onUp);
       };
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup",   onUp);
-      document.addEventListener("touchmove", onMove, { passive: false });
-      document.addEventListener("touchend",  onUp);
-    };
-    resizeEl.addEventListener("mousedown",  startResize);
-    resizeEl.addEventListener("touchstart", startResize, { passive: false });
+      resizeEl.addEventListener("pointermove",   onMove);
+      resizeEl.addEventListener("pointerup",     onUp);
+      resizeEl.addEventListener("pointercancel", onUp);
+    });
   }
 
   // ── 最前面へ ──────────────────────────────────────────────────
