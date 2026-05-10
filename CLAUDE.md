@@ -59,3 +59,24 @@ static/
 
 1. `algorithms.py` にジェネレータ関数を実装
 2. `AlgorithmList` に登録: `("表示名", my_func, {"type": "search"})`
+
+---
+
+## 現在のファイルバージョン
+
+| ファイル | バージョン |
+|---|---|
+| `static/js/app.js` | **v12** |
+| `static/js/array_canvas.js` | **v8** |
+| `static/js/ws_client.js` | v1 |
+| `static/css/style.css` | v3 |
+
+---
+
+## 最近の変更履歴
+
+| 日付 | 内容 |
+|---|---|
+| 2026-05-10 | タッチドラッグ軸ロックバグ修正 — `onMove` 内に `preventDefault()` 追加 (app.js v11→v12) |
+| 2026-05-10 | タッチデバイス対応 — `resize-handle` 追加、`touch-action: none`、touch イベントリスナー追加 (app.js v10→v11, style.css v2→v3) |
+| 2026-05-03 | カラーテーマ全面対応 (dark/bright/hc/hcbright) — array_canvas.js v8 |
