@@ -139,7 +139,8 @@ function _applyTheme(key) {
   document.querySelectorAll(".panel").forEach(el => {
     const panel = el._panel;
     if (!panel) return;
-    if (panel.isRunning && panel.arrayCanvas && panel._lastFrame) {
+    if (panel.arrayCanvas && panel._lastFrame) {
+      // 完了後の最終状態もテーマ切替で消えないよう、最新フレームを保持したまま再描画
       panel.arrayCanvas.draw(panel._lastFrame);
     } else {
       panel._drawPreview();
@@ -328,6 +329,7 @@ class ArrayPanel {
         <span class="status-algo">-</span>
         <span class="status-state">待機中</span>
         <span class="status-frames">フレーム: 0</span>
+        <span class="status-done-badge"></span>
       </div>
       <div class="resize-handle" title="リサイズ"></div>
     `;
@@ -594,6 +596,7 @@ class ArrayPanel {
     this._setBtns({ start: false, pause: true, stop: true, reset: false });
     this.el.querySelector(".status-algo").textContent = info.algo_name;
     this.el.querySelector(".text-overlay").textContent = "";
+    this._clearDoneBadge();
 
     this.client = new AnimationClient(
       this.sessionId,
@@ -619,7 +622,33 @@ class ArrayPanel {
       this.el.classList.add("finished");
       this._setStatus("完了", "#44aa44");
       this._setBtns({ start: false, pause: false, stop: false, reset: true });
+      // Found/Not Found/完了は、キャンバス上のデータをdimして隠さないよう
+      // ステータスバーの固定背景色バッジにのみ表示する
+      this._showDoneBadge(frame);
     }
+  }
+
+  _showDoneBadge(frame) {
+    const badge = this.el.querySelector(".status-done-badge");
+    badge.classList.remove("badge-found", "badge-notfound", "flash");
+    if (frame.found === true) {
+      badge.textContent = "✅ Found !";
+      badge.classList.add("badge-found");
+    } else if (frame.found === false) {
+      badge.textContent = "❌ Not Found";
+      badge.classList.add("badge-notfound");
+    } else {
+      badge.textContent = "🎉 完了!";
+    }
+    badge.classList.add("visible");
+    void badge.offsetWidth;
+    badge.classList.add("flash");
+  }
+
+  _clearDoneBadge() {
+    const badge = this.el.querySelector(".status-done-badge");
+    badge.textContent = "";
+    badge.classList.remove("visible", "badge-found", "badge-notfound", "flash");
   }
 
   // ── WebSocket クローズ ────────────────────────────────────────
@@ -665,6 +694,7 @@ class ArrayPanel {
     if (this.isRunning) this.stop();
     this.el.querySelector(".text-overlay").textContent = "（開始ボタンを押してください）";
     this.el.querySelector(".status-frames").textContent = "フレーム: 0";
+    this._clearDoneBadge();
     this.el.classList.remove("finished");
     this._setStatus("待機中", "#888");
     this._setBtns({ start: true, pause: false, stop: false, reset: false });

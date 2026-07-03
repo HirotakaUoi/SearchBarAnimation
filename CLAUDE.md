@@ -66,10 +66,10 @@ static/
 
 | ファイル | バージョン |
 |---|---|
-| `static/js/app.js` | **v14** |
-| `static/js/array_canvas.js` | **v8** |
+| `static/js/app.js` | **v15** |
+| `static/js/array_canvas.js` | **v9** |
 | `static/js/ws_client.js` | v1 |
-| `static/css/style.css` | v3 |
+| `static/css/style.css` | **v4** |
 
 ---
 
@@ -77,6 +77,7 @@ static/
 
 | 日付 | 内容 |
 |---|---|
+| 2026-07-03 | 完了時の全画面dim+中央大表示（完了!/Found!/Not Found）を廃止。キャンバス上には一切描かず、ステータスバーの `status-done-badge` に固定背景色バッジ（テーマが変わっても視認性が落ちない）で表示するよう変更。表示時に短いフラッシュアニメーション(1.4秒)を付与。副次的に、テーマ切替時に実行中でないパネル（完了後含む）が最終フレームでなくプレビューに巻き戻るバグも発見・修正 (array_canvas.js v8→v9, app.js v14→v15, style.css v3→v4) |
 | 2026-05-11 | drag/resize を Pointer Events API に統一 — `setPointerCapture` で軸ロック完全解消 (app.js v13→v14) |
 | 2026-05-10 | タッチドラッグ軸ロックバグ修正 / スナップをリリース時のみ適用 / タッチデバイス対応 (app.js v10→v13) |
 | 2026-05-03 | カラーテーマ全面対応 (dark/bright/hc/hcbright) — array_canvas.js v8 |

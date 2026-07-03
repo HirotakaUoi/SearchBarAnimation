@@ -315,6 +315,25 @@ header h1 {
 }
 .status-bar .status-algo  { color: #e2b96f; font-weight: bold; }
 .status-bar .status-state { color: #90caf9; }
+.status-bar .status-done-badge {
+  margin-left: auto;
+  font-size: .8rem;
+  font-weight: bold;
+  padding: 2px 9px;
+  border-radius: 10px;
+  display: none;
+  /* 背景色を固定で持つことで、カラーテーマが変わっても視認性を保つ */
+  background: #3a3a10;
+  color: #FFD700;
+}
+.status-bar .status-done-badge.visible { display: inline-block; }
+.status-bar .status-done-badge.badge-found { background: #0d3a17; color: #6dff9e; }
+.status-bar .status-done-badge.badge-notfound { background: #3a0d0d; color: #ff8888; }
+.status-bar .status-done-badge.flash { animation: statusBadgeFlash 1.4s ease-out; }
+@keyframes statusBadgeFlash {
+  0%   { box-shadow: 0 0 0 4px rgba(255,215,0,.55); }
+  100% { box-shadow: 0 0 0 4px rgba(255,215,0,0); }
+}
 
 /* ===== レスポンシブ ===== */
 @media (max-width: 560px) {
