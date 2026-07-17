@@ -305,6 +305,7 @@ class ArrayPanel {
           <input type="number" class="inp-target" min="0" max="999" placeholder="自動"
                  style="width:60px" title="探索する値 (空欄=自動)">
         </label>
+        <button class="btn btn-secondary btn-newdata" title="新しいランダム配列を生成">🎲 配列再生成</button>
         <div class="speed-group">
           <label>速度</label>
           <input type="range" class="rng-speed" min="1" max="200" value="80"
@@ -369,6 +370,7 @@ class ArrayPanel {
     q(".sel-algo") .addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
     q(".sel-size") .addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
     q(".inp-target").addEventListener("change", () => { if (!this.isRunning) this._drawPreview(); });
+    q(".btn-newdata").addEventListener("click", () => { if (!this.isRunning) this._drawPreview(true); });
 
     this.el.addEventListener("mousedown", () => this._bringToFront());
 
@@ -490,7 +492,7 @@ class ArrayPanel {
   }
 
   // ── プレビュー描画 ──────────────────────────────────────────
-  _drawPreview() {
+  _drawPreview(forceNew = false) {
     const wrapper = this.el.querySelector(".canvas-wrapper");
     const canvas  = this.el.querySelector(".array-canvas");
     const w = wrapper.clientWidth;
@@ -500,7 +502,7 @@ class ArrayPanel {
       canvas.width  = w;
       canvas.height = h;
     }
-    this._drawPreviewOnCanvas(canvas);
+    this._drawPreviewOnCanvas(canvas, forceNew);
   }
 
   /** 全パネル一括適用用: 外部から渡した共有データでプレビューを描画 */
@@ -518,19 +520,34 @@ class ArrayPanel {
     const algo   = algorithms.find(a => a.id === algoId);
     const sorted = !!(algo && algo.meta && algo.meta.sorted);
     const forced = targetRaw !== "" ? Number(targetRaw) : null;
+    this._previewValues     = [...sharedValues];
+    this._previewAutoTarget = (forced !== null)
+      ? forced
+      : sharedValues[Math.floor(Math.random() * sharedValues.length)];
     this._previewCache = new ArrayCanvas(canvas).drawPreview(
       sharedValues.length, sorted, forced, sharedValues
     );
   }
 
-  _drawPreviewOnCanvas(canvas) {
+  _drawPreviewOnCanvas(canvas, forceNew = false) {
     const numItems = Number(this.el.querySelector(".sel-size").value) || 16;
     const algoId   = Number(this.el.querySelector(".sel-algo").value);
     const algo     = algorithms.find(a => a.id === algoId);
     const sorted   = !!(algo && algo.meta && algo.meta.sorted);
-    const tRaw     = this.el.querySelector(".inp-target").value.trim();
-    const forced   = tRaw !== "" ? Number(tRaw) : null;
-    this._previewCache = new ArrayCanvas(canvas).drawPreview(numItems, sorted, forced);
+    // 対象配列と自動targetはパネルごとに保持し、データ数変更・「🎲 配列再生成」・
+    // 全パネルへ適用のときだけ作り直す。target入力・ウインドウリサイズ・
+    // アルゴリズム切替・テーマ切替・リセットでは同じ配列を使い続ける
+    if (forceNew || !this._previewValues || this._previewValues.length !== numItems) {
+      const maxVal = numItems >= 200 ? 999 : 99;
+      this._previewValues = Array.from({ length: numItems },
+                                       () => Math.floor(Math.random() * maxVal) + 1);
+      this._previewAutoTarget =
+        this._previewValues[Math.floor(Math.random() * numItems)];
+    }
+    const tRaw   = this.el.querySelector(".inp-target").value.trim();
+    const forced = tRaw !== "" ? Number(tRaw) : this._previewAutoTarget;
+    this._previewCache = new ArrayCanvas(canvas)
+      .drawPreview(numItems, sorted, forced, this._previewValues);
   }
 
   // ── スピード変換 ─────────────────────────────────────────────
