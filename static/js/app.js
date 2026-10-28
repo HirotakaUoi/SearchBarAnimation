@@ -520,6 +520,7 @@ class ArrayPanel {
     const algo   = algorithms.find(a => a.id === algoId);
     const sorted = !!(algo && algo.meta && algo.meta.sorted);
     const forced = targetRaw !== "" ? Number(targetRaw) : null;
+    this._lastFrame         = null;   // 前回の終了フレームを破棄（_drawPreviewOnCanvas と同じ理由）
     this._previewValues     = [...sharedValues];
     this._previewAutoTarget = (forced !== null)
       ? forced
@@ -530,6 +531,10 @@ class ArrayPanel {
   }
 
   _drawPreviewOnCanvas(canvas, forceNew = false) {
+    // 表示をプレビューに置き換えるので、前回の終了フレームを破棄する
+    // （残すと、完了後にデータ数変更などでプレビューを差し替えたあと、
+    //   リサイズ・テーマ切替で前回の終了状態が描き直される）
+    this._lastFrame = null;
     const numItems = Number(this.el.querySelector(".sel-size").value) || 16;
     const algoId   = Number(this.el.querySelector(".sel-algo").value);
     const algo     = algorithms.find(a => a.id === algoId);

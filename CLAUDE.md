@@ -66,7 +66,7 @@ static/
 
 | ファイル | バージョン |
 |---|---|
-| `static/js/app.js` | **v16** |
+| `static/js/app.js` | **v17** |
 | `static/js/array_canvas.js` | **v9** |
 | `static/js/ws_client.js` | **v2** |
 | `static/css/style.css` | **v4** |
@@ -77,6 +77,7 @@ static/
 
 | 日付 | 内容 |
 |---|---|
+| 2026-10-28 | 完了後に「全パネルへ適用」・アルゴリズム/データ数/target の変更・🎲 配列再生成でプレビューを差し替えたあと、パネルのリサイズやテーマ切替をすると**前回の終了状態に戻ってしまう**バグを修正。プレビュー描画（`_drawPreviewOnCanvas` / `_applySharedPreview`）で前回の終了フレーム `_lastFrame` を破棄していなかったため、`_onResize` / `_applyTheme` がそれを描き直していた。プレビュー描画時に `_lastFrame` を破棄するよう変更（v3 で同日に直した不具合と同じ原因）。差し替えていなければ終了状態を保持すること・途中停止時のフレームを保持することは従来どおり。ブラウザ実機（2パネル・描画フック）で修正前の再現と修正後の解消を確認 (app.js v16→v17) |
 | 2026-10-27 (2) | Python を uv 管理の **3.14.10** に更新（3.14.9 から。セキュリティ修正3件）。依存パッケージは変更なし（すでに最新）。アプリのコード変更なし。venv は relocatable で作り直し。全5アルゴリズムが完走し、全フレームの内容が更新前と完全一致することを確認 |
 | 2026-10-27 | Python を uv 管理の **3.14.9** に更新（3.14.4 から。セキュリティ修正32件）し、依存パッケージを最新に更新（fastapi 0.162.0 / starlette 1.10.0 / uvicorn 0.54.0 / websockets 17.3 / pydantic 2.14.1。starlette・anyio・idna の既知の脆弱性8件を解消）。アプリのコード変更なし。venv は relocatable で作り直し。全5アルゴリズムが完走し、全フレームの内容が更新前と完全一致することを確認 |
 | 2026-09-29 | 起動方式を変更（アプリのコード変更なし）— ルートの共通スクリプト `run_server.sh` 経由に統一。`.venv` を Dropbox で全マシン共有するため、Python を uv 管理の **3.14.4** に固定（`.python-version` は git 管理外、pyproject に `[tool.uv] python-preference = "only-managed"`）し、venv を relocatable で作り直した（Dropbox の2通りのパスどちらでも動く）。`.claude/launch.json` も `../run_server.sh . <port>` に変更。Python 3.14.4 で全アルゴリズムの完走を確認 |
