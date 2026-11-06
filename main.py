@@ -143,6 +143,9 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
 
 @app.get("/")
 async def root():
-    return FileResponse(BASE_DIR / "static" / "index.html")
+    # index.html は毎回サーバーに更新の有無を確認させる。
+    # (キャッシュ指定が無いとブラウザが古い index.html を使い続け、?v=N を上げた新しい JS が読み込まれない)
+    return FileResponse(BASE_DIR / "static" / "index.html",
+                        headers={"Cache-Control": "no-cache"})
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")

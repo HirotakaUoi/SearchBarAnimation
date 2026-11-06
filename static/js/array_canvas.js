@@ -55,21 +55,26 @@ class ArrayCanvas {
     ctx.fillStyle = _acTheme().canvasBg;
     ctx.fillRect(0, 0, this.cw, this.ch);
 
-    // オブジェクトエリア (常にキャンバス全体を使う)
+    // 説明文の帯: グラフはこの下から描き、説明文がバーや探索値の水平線・参照バーの値に重ならないようにする。
+    // 説明はコマごとに 1〜3 行と変わるので、帯の高さは常に 3 行分で固定する（コマごとにグラフが上下に動かないように）。
+    // キャンバスが低いときは、帯をキャンバスの高さの 3 割までに抑える（その分だけ説明がグラフに重なる）
+    const TEXT_LINE_H = 16, TEXT_PAD = 4, TEXT_MAX_LINES = 3;
+    const textBand = Math.min(TEXT_MAX_LINES * TEXT_LINE_H + TEXT_PAD * 2, Math.round(this.ch * 0.3));
+
+    // オブジェクトエリア (説明文の帯の下、キャンバスの残り全部)
     const nObjs = objects.length;
     if (nObjs > 0) {
-      const eachH = this.ch / nObjs;
+      const eachH = (this.ch - textBand) / nObjs;
       for (let oi = 0; oi < nObjs; oi++) {
         if (objects[oi].type === "array1d") {
-          this._drawArray1d(objects[oi], oi * eachH, eachH);
+          this._drawArray1d(objects[oi], textBand + oi * eachH, eachH);
         }
       }
     }
 
-    // テキストオーバーレイ (グラフの上に半透明背景で重ねる)
+    // テキストオーバーレイ (説明文の帯に半透明背景で描く)
     if (texts.length > 0) {
-      const TEXT_LINE_H = 18;
-      const pad = 6;
+      const pad = TEXT_PAD;
       const boxH = texts.length * TEXT_LINE_H + pad * 2;
       ctx.save();
       ctx.fillStyle = _acTheme().textOverlay;
@@ -148,17 +153,7 @@ class ArrayCanvas {
       ctx.strokeStyle = _acTheme().foundCellText;
       ctx.lineWidth   = 1.5;
       ctx.strokeRect(refX + 0.5, refY + 0.5, rw - 1, refH - 1);
-
-      // 高さが同じことを示す水平の破線ガイド (参照バー右辺から延ばす)
-      ctx.save();
-      ctx.strokeStyle = "rgba(68, 204, 68, 0.35)";
-      ctx.lineWidth   = 1;
-      ctx.setLineDash([4, 5]);
-      ctx.beginPath();
-      ctx.moveTo(PAD_L + REF_W, refY);
-      ctx.lineTo(chartR, refY);
-      ctx.stroke();
-      ctx.restore();
+      // 探索値の高さの水平線は、バーに隠れないよう後で（バーより上のレイヤに）描く
 
       // 値ラベル (参照バーの上)
       const rFs = Math.max(7, Math.min(10, REF_W * 0.4));
@@ -203,6 +198,22 @@ class ArrayCanvas {
       ctx.fillRect(chartL + from * barW, chartT,
                    (to - from + 1) * barW, chartH);
       ctx.globalAlpha = 1.0;
+    }
+
+    // ── 探索値 (target) の高さの水平線 ──
+    // 選択ソートの基準線と同じく、バーとフィルより上のレイヤに太めの破線で描く
+    // （参照バーの右辺から右端まで。色は参照バーの縁と同じ緑で、どの値と比べているかが分かるように）
+    if (HAS_TARGET) {
+      const lineY = Math.round(valToY(target)) + 0.5;
+      ctx.save();
+      ctx.strokeStyle = _acTheme().foundCellText;
+      ctx.lineWidth   = 2;
+      ctx.setLineDash([7, 4]);
+      ctx.beginPath();
+      ctx.moveTo(PAD_L + REF_W - 2, lineY);
+      ctx.lineTo(chartR, lineY);
+      ctx.stroke();
+      ctx.restore();
     }
 
     // ── インデックスラベル (バー下) ──

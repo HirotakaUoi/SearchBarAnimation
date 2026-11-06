@@ -234,6 +234,27 @@ header h1 {
   width: 80px;
   padding: 0;
 }
+/* 速度スライダー（×0.5・×1・×2・×5・×10 で止まる）は扱いやすいよう長めにする。
+   パネルでは行に収まらなければ次の行へ回り、パネルの幅に合わせて伸びる（220〜420px） */
+.panel .speed-group.speed-main { flex: 1 1 300px; }
+.panel .speed-group.speed-main input.rng-speed {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 220px;
+  max-width: 420px;
+}
+#global-controls #global-speed { width: 240px; }
+/* 速度の表示は幅を固定（「ステップ」「×0.14」「×10」などで、後ろのボタンや目盛りの位置がずれないように） */
+.speed-group .speed-value,
+#global-speed-val {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 4.6em;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 .speed-value {
   font-size: .75rem;
   color: #e2b96f;
