@@ -31,7 +31,7 @@ const AC_THEMES = {
               foundCellBg: "#a8eea8", foundCellText: "#003300",
               textOverlay: "rgba(10,20,40,0.88)" },
 };
-let _acThemeKey = "dark";
+let _acThemeKey = "bright";   // 初期テーマは明るめ（index.html の <body data-theme> と ☀ ボタンの theme-active も同じにする）
 function _acTheme() { return AC_THEMES[_acThemeKey] ?? AC_THEMES.dark; }
 function setCanvasTheme(k) { _acThemeKey = k; }
 
