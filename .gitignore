@@ -10,3 +10,6 @@ build/
 .DS_Store
 # ローカル開発用の Python 固定（Dropbox で同期。Render は render.yaml の PYTHON_VERSION を使う）
 .python-version
+
+# Claude Code local settings
+.claude/settings.local.json
