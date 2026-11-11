@@ -381,6 +381,11 @@ header h1 {
   opacity: 1 !important;
 }
 
+/* 使い方（マニュアル）ボタン: マニュアルを別のタブで開くリンク（a 要素をボタンの見た目にする） */
+a.btn { text-decoration: none; }
+#btn-manual { margin-left: 8px; }
+header.fit-4 #btn-manual { margin-left: 2px; }
+
 /* ===== ヘッダーの詰め方 =====
    ウインドウが狭いとき、app.js の _fitHeader が、ヘッダー（タイトル・ツールバー・全パネル一括）が
    2 行に収まるまで header に fit-1〜fit-5 を順に付ける（前の段階の詰め方も残したまま次を足す）。

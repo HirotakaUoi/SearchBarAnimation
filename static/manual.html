@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使い方マニュアル – 配列探索アルゴリズム</title>
+  <link rel="stylesheet" href="/static/css/manual.css?v=1">
+</head>
+<body>
+<div class="page">
+
+<div class="cover">
+  <p class="app">配列探索アルゴリズム</p>
+  <h1>使い方マニュアル</h1>
+  <p class="lead">配列の中から目的の値（target）を探す探索アルゴリズムを、棒グラフで動かして見せるアプリです。</p>
+  <p class="meta">2026-11-11 版　／　アルゴリズム 5 本</p>
+  <div class="links">
+    <a href="/static/manual.pdf?v=1" target="_blank" rel="noopener">📄 PDF 版を開く</a>
+    <a class="sub" href="/" target="_blank" rel="noopener">アニメーションの画面を開く</a>
+  </div>
+</div>
+
+<nav class="toc"><b>目次</b><ol><li><a href="#about">このアプリについて</a></li><li><a href="#screen">画面の構成</a></li><li><a href="#basic">基本の使い方</a></li><li><a href="#header">画面上部のコントロールパネル</a></li><li><a href="#global">全パネル一括</a></li><li><a href="#panel">パネルの操作</a></li><li><a href="#settings">このアプリの設定</a></li><li><a href="#legend">アニメーションの見方</a></li><li><a href="#compare">複数のアルゴリズムを並べて比べる</a></li><li><a href="#keys">キーボード・マウスの操作</a></li><li><a href="#trouble">困ったときは</a></li></ol></nav>
+
+<h2 id="about">このアプリについて</h2>
+<p>データは高さの違う棒（バー）で表示します。左端の緑のバーと緑の破線が、探している値（target）の高さです。
+比べている位置を紫の矢印で示すので、どの値と比べているか、探す範囲がどう狭まるかを目で追えます。</p>
+<table><thead><tr><th>アルゴリズム</th><th>内容</th></tr></thead><tbody><tr><td>線形探索（基本）</td><td>先頭から順に 1 つずつ target と比べます。</td></tr><tr><td>線形探索（番兵法）</td><td>配列の末尾に target を「番兵」として置き、範囲の確認を省いて比べます。</td></tr><tr><td>線形探索（整列済み配列）</td><td>昇順に並んだ配列で、target より大きい値が出たらそこで打ち切ります。</td></tr><tr><td>二分探索（反復）</td><td>探す範囲の真ん中と比べ、範囲を半分ずつ絞り込みます（ループで書いた版）。</td></tr><tr><td>二分探索（再帰）</td><td>同じ二分探索を、再帰呼び出しで書いた版です。</td></tr></tbody></table>
+
+<h2 id="screen">画面の構成</h2>
+<figure><img src="/static/manual/screen.png?v=1" alt="画面全体（点線の番号は下の説明と対応）" loading="eager"><figcaption>画面全体（点線の番号は下の説明と対応）</figcaption></figure>
+<ul>
+<li><span class="no">1</span> <b>ヘッダー（画面上部のコントロールパネル）</b> … パネルの追加、全パネルの開始・停止、表示の大きさ・色合い、このマニュアル。</li>
+<li><span class="no">2</span> <b>全パネル一括</b> … ヘッダーの 2 行目です。全パネルの設定をそろえます。</li>
+<li><span class="no">3</span> <b>パネル</b> … 1 つのアルゴリズムを動かす画面です。何枚でも増やせ、ドラッグで自由に並べられます。</li>
+</ul>
+
+<h2 id="basic">基本の使い方</h2>
+<ol class="steps">
+<li>パネルの「アルゴリズム」で、見たいアルゴリズムを選びます。表示エリアに開始前の様子が出ます。</li>
+<li>データ数など、パネルの設定を決めます（変えるとすぐに表示に反映されます）。</li>
+<li><span class="k primary">▶ 開始</span> を押します。上の帯の説明を読みながら、動きを追ってください。</li>
+<li>速さは速度スライダーで変えられます。止めて考えるときは <span class="k warning">⏸ 一時停止</span>、1 手ずつ進めるときはステップ実行（速度スライダーの左端）が便利です。</li>
+<li>終わると、状態の表示に <span class="k success">✅ Found !</span>（見つかった）か <span class="k danger">❌ Not Found</span>（見つからなかった） が出ます。もう一度動かすときは <span class="k sec">↺ リセット</span> を押してから <span class="k primary">▶ 開始</span> を押します。</li>
+</ol>
+
+
+<h2 id="header">画面上部のコントロールパネル（ヘッダー）</h2>
+<p>画面写真の <span class="no">1</span> の部分です。すべてのパネルに対する操作をまとめています。</p>
+<table><thead><tr><th>ボタン</th><th>はたらき</th></tr></thead><tbody><tr><td><span class="k add">＋ パネル追加</span></td><td>パネルを 1 枚増やします。パネルごとに別のアルゴリズム・設定で動かせます。</td></tr><tr><td><span class="k success">▶▶ 全開始</span></td><td>動いていないパネルを、まとめて最初から開始します（終わったパネルも、もう一度最初から動きます）。</td></tr><tr><td><span class="k warning">⏸ 全一時停止</span></td><td>動いているパネルをまとめて一時停止します。押すと表示が <span class="k warning">▶ 全再開</span> に変わり、もう一度押すと再開します。</td></tr><tr><td><span class="k danger">⏹ 全停止</span></td><td>動いているパネルをすべて止めます。</td></tr><tr><td><span class="k sec">↺ 全リセット</span></td><td>すべてのパネルを開始前の状態に戻します。</td></tr><tr><td><span class="k sec">⊞ サイズ統一</span></td><td>最前面のパネル（最後にさわったパネル）と同じ大きさに、ほかのパネルをそろえます。</td></tr><tr><td><span class="k sec">－</span><span class="k sec">100%</span><span class="k sec">＋</span><span class="k sec">↺</span></td><td>パネルの部分を縮小・拡大します（<span class="k sec">↺</span> で 100% に戻ります）。パネルの上で <kbd>Ctrl</kbd> を押しながらマウスのホイールを回しても変えられます。</td></tr><tr><td><span class="k sec">🌙</span><span class="k sec">☀</span><span class="k sec">◑</span><span class="k sec">◐</span></td><td>画面の色合いを切り替えます。🌙 ダーク／☀ 明るめ（最初はこれ）／◑ コントラスト強め（暗め）／◐ コントラスト強め（明るめ）。教室で投影するときは、見やすいものを選んでください。読み込み直すと ☀ に戻ります。</td></tr><tr><td><span class="k sec">？ 使い方</span></td><td>このマニュアルを別のタブで開きます。</td></tr></tbody></table>
+<div class="tip"><b>ウインドウが狭いとき</b><br>
+ヘッダーが 2 行に収まるよう、自動で表示を詰めます。まず文字やボタンを小さくし、次にタイトルの副題を省き、ボタンをアイコン（▶▶ や ⏹ など）だけにし、最後はタイトルも隠します。
+アイコンだけになったボタンも、マウスを乗せると名前が出ます。ウインドウを広げると元の表示に戻ります。</div>
+
+
+<h2 id="global">全パネル一括</h2>
+<p>画面写真の <span class="no">2</span> の部分です。ヘッダーの 2 行目です。</p>
+<table><thead><tr><th>設定</th><th>はたらき</th></tr></thead><tbody><tr><td>データ数</td><td>配列の要素の数です（16〜2048）。</td></tr><tr><td>target</td><td>探す値です。空欄のときは、適用するときに 1 つ決めて全パネルで同じ値を使います。</td></tr><tr><td>速度</td><td>全パネルの速度です。</td></tr><tr><td><span class="k sec">↕ 全パネルへ適用</span></td><td>全パネルに<strong>同じ配列と同じ target</strong> を配り、速度もそろえます（実行中のパネルは速度だけ変わります）。アルゴリズムどうしの比較に使います。</td></tr></tbody></table>
+
+
+<h2 id="panel">パネルの操作</h2>
+<p>画面写真の <span class="no">3</span> の部分です。パネルは何枚でも増やせ、それぞれ独立に動かせます。</p>
+<figure class="half"><img src="/static/manual/panel.png?v=1" alt="パネルの各部（番号は下の表と対応）" loading="eager"><figcaption>パネルの各部（番号は下の表と対応）</figcaption></figure>
+<table><thead><tr><th></th><th>部品</th><th>はたらき</th></tr></thead><tbody><tr><td><span class="no">1</span></td><td>⠿（つまみ）</td><td>ドラッグするとパネルを動かせます。ほかのパネルの近くで離すと、端がそろう位置に吸い付きます。クリックしたパネルが前面に出ます（最前面のパネルは枠の色が変わります）。</td></tr><tr><td><span class="no">2</span></td><td>✕</td><td>パネルを閉じます（削除）。</td></tr><tr><td><span class="no">3</span></td><td>アルゴリズム</td><td>動かすアルゴリズムを選びます。選ぶとすぐに、下の表示エリアに開始前の様子（プレビュー）が出ます。</td></tr><tr><td><span class="no">4</span></td><td>データ数・target・🎲</td><td>配列の要素の数、探す値、配列の作り直しです。下の「このアプリの設定」を参照してください。</td></tr><tr><td><span class="no">5</span></td><td>速度</td><td>アニメーションの速さです。下の「速度スライダー」「ステップ実行」を参照してください。</td></tr><tr><td><span class="no">6</span></td><td><span class="k primary">▶ 開始</span><br><span class="k warning">⏸ 一時停止</span><br><span class="k danger">⏹ 停止</span><br><span class="k sec">↺ リセット</span></td><td>開始 / 一時停止（押すと <span class="k warning">▶ 再開</span> に変わります）/ 途中でやめる / 開始前の状態に戻す、のボタンです。<br>終わったあと、もう一度動かすときは <span class="k sec">↺ リセット</span> を押してから <span class="k primary">▶ 開始</span> を押します（ヘッダーの <span class="k success">▶▶ 全開始</span> でも最初から動きます）。</td></tr><tr><td><span class="no">7</span></td><td>表示エリア</td><td>上の帯に、いま何をしているかの説明（比べている値・式・回数など）が出ます。その下がアニメーションです。終わったあとも最後の状態がそのまま残ります。</td></tr><tr><td><span class="no">8</span></td><td>状態の表示</td><td>アルゴリズム名・状態（待機中／実行中／一時停止／ステップ実行／完了など）・表示したコマ数です。終わると <span class="k success">✅ Found !</span>（見つかった）か <span class="k danger">❌ Not Found</span>（見つからなかった） が出ます。</td></tr><tr><td><span class="no">9</span></td><td>右下のつまみ</td><td>ドラッグするとパネルの大きさを変えられます。表示エリアも大きさに合わせて描き直されます。</td></tr></tbody></table>
+
+<h3 id="speed">速度スライダー</h3>
+<p>右へ動かすほど速くなります。スライダーをドラッグすると、下の表の位置で止まります（つまみが吸い付きます）。間の位置にも置けます。
+アニメーションの途中で動かしても、すぐにその速さに変わります。</p>
+<table><thead><tr><th>位置</th><th>表示</th><th>1 コマの時間</th></tr></thead><tbody><tr><td>左端</td><td>ステップ</td><td><kbd>Space</kbd> か <kbd>Enter</kbd> を押すたびに 1 コマ</td></tr><tr><td></td><td>×0.1</td><td>1 秒</td></tr><tr><td></td><td>×0.5</td><td>0.2 秒</td></tr><tr><td>最初の位置</td><td>×1</td><td>0.1 秒</td></tr><tr><td></td><td>×2</td><td>0.05 秒</td></tr><tr><td></td><td>×5</td><td>0.02 秒</td></tr><tr><td>右端</td><td>×10</td><td>0.01 秒</td></tr></tbody></table>
+<h3 id="step">ステップ実行（1 コマずつ進める）</h3>
+<ol class="steps">
+<li>速度スライダーを左端（表示が「ステップ」）にします。</li>
+<li><span class="k primary">▶ 開始</span> を押すと、1 コマ目を表示して止まります。状態の表示が「ステップ実行（Space / Enter で 1 コマ）」になります。</li>
+<li><kbd>Space</kbd> か <kbd>Enter</kbd> を押すたびに 1 コマ進みます。ステップ実行にしているパネルが、すべていっしょに進みます。</li>
+<li>途中でスライダーを右へ動かすと、そこから普通の再生に戻ります。左端に戻せば、またステップ実行になります。</li>
+</ol>
+<div class="note"><b>キーが効かないとき</b><br>
+文字や数を入力する欄（target や式の入力欄など）にカーソルがあると、<kbd>Space</kbd> / <kbd>Enter</kbd> はその欄への入力になります。
+パネルの何もないところをクリックしてから押してください。ステップ実行中は <span class="k warning">⏸ 一時停止</span> は使えません（押さなければ進まないため）。</div>
+
+
+
+
+<h2 id="settings">このアプリの設定</h2>
+<table><thead><tr><th>設定</th><th>はたらき</th></tr></thead><tbody><tr><td>データ数</td><td>配列の要素の数です（16〜2048）。値は 1〜99（200 個以上のときは 1〜999）の乱数です。</td></tr><tr><td>target</td><td>探す値です。<strong>空欄</strong>のときは自動で決まり、7 割は配列の中にある値、3 割は配列に無いかもしれない値になります（見つからない場合も見られます）。数を入れると、その値を探します。</td></tr><tr><td><span class="k sec">🎲 配列再生成</span></td><td>同じデータ数で、新しい配列を作ります。target の入力・パネルの大きさの変更・アルゴリズムの切り替え・リセットでは、配列は変わりません（同じ配列のまま比べられます）。</td></tr></tbody></table>
+<p>線形探索（整列済み配列）と二分探索は、同じ値を昇順に並べ替えて表示します。</p>
+
+
+<h2 id="legend">アニメーションの見方</h2>
+<figure class="half"><img src="/static/manual/running.png?v=1" alt="二分探索（反復）の途中。真ん中（黄）と比べ、範囲の外（暗い灰色）を除いていく" loading="eager"><figcaption>二分探索（反復）の途中。真ん中（黄）と比べ、範囲の外（暗い灰色）を除いていく</figcaption></figure>
+<p>表示エリアの上の帯に、いま何をしているか（比べている値、式、回数など）が文字で出ます。色と印の意味は次のとおりです。</p>
+<table><thead><tr><th>色・印</th><th>意味</th></tr></thead><tbody><tr><td><span class="sw" style="background:#4472C4"></span>青</td><td>データ（配列の要素）</td></tr><tr><td><span class="sw" style="background:#b8f0b8"></span>緑のバー ＋ <span class="sw line" style="border-top-color:#005500"></span>緑の破線</td><td>探している値（target）の高さ。破線より高いか低いかで、大小が一目でわかります。</td></tr><tr><td><span class="sw" style="background:#cc00cc"></span>紫の矢印</td><td>いま比べている位置。矢印の上に比べている式（例: <code>? 35</code>）が出ます。</td></tr><tr><td><span class="sw" style="background:#ffff00"></span>黄</td><td>二分探索の center（範囲の真ん中）。見つかったときは黄と赤で点滅します。</td></tr><tr><td><span class="sw" style="background:#aaffaa"></span>薄い緑</td><td>二分探索の first / last（探す範囲の両端）</td></tr><tr><td><span class="sw" style="background:#ff4444"></span>赤</td><td>見つかった位置</td></tr><tr><td><span class="sw" style="background:#6b7180"></span>暗い灰色</td><td>二分探索で、探す範囲から外れた部分</td></tr><tr><td><span class="sw" style="background:#cc6600"></span>橙</td><td>番兵（番兵法で末尾に置いた target）</td></tr></tbody></table>
+
+
+<h2 id="compare">複数のアルゴリズムを並べて比べる</h2>
+<ol class="steps">
+<li><span class="k add">＋ パネル追加</span> でパネルを増やし、それぞれのパネルで比べたいアルゴリズムを選びます。</li>
+<li>ヘッダーの「全パネル一括」でデータ数・target・速度を決めます（target は空欄でもかまいません）。</li>
+<li><span class="k sec">↕ 全パネルへ適用</span> を押すと、全パネルに同じ配列と同じ target が配られます。</li>
+<li><span class="k success">▶▶ 全開始</span> で全パネルを同時に開始します。速さの違い（コマ数の違い）が並べて見られます。</li>
+</ol>
+<div class="tip"><b>見やすく並べるには</b><br>
+<span class="k sec">⊞ サイズ統一</span> でパネルの大きさをそろえ、⠿ でドラッグして並べます（近くに置くと端がそろいます）。
+パネルが画面に入りきらないときは、ヘッダーの <span class="k sec">－</span> で縮小してください。</div>
+
+
+<h2 id="keys">キーボード・マウスの操作</h2>
+<table><thead><tr><th>操作</th><th>はたらき</th></tr></thead><tbody><tr><td><kbd>Space</kbd> / <kbd>Enter</kbd></td><td>ステップ実行中のパネルを 1 コマ進める（文字の入力欄にカーソルがあるときは効きません）</td></tr><tr><td><kbd>Ctrl</kbd> ＋ マウスのホイール</td><td>パネルの部分を縮小・拡大（パネルの上で）</td></tr><tr><td>⠿ をドラッグ</td><td>パネルを動かす</td></tr><tr><td>右下のつまみをドラッグ</td><td>パネルの大きさを変える</td></tr><tr><td>ボタンにマウスを乗せる</td><td>ボタンの名前・説明を表示</td></tr></tbody></table>
+<p>タブレットでも、指でパネルの移動・大きさの変更ができます。</p>
+
+<h2 id="trouble">困ったときは</h2><h3>アプリを新しくしたはずなのに、画面が前のまま</h3><p>ブラウザが古いファイルを使っています。<kbd>Shift</kbd> を押しながら再読み込み（Mac: <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>、Windows: <kbd>Ctrl</kbd>+<kbd>F5</kbd>）してください。</p><h3>インターネット上の版（Render）で、最初の表示がとても遅い</h3><p>しばらく誰も使っていないとサーバーが止まり、次に開いたときの起動に 1 分ほどかかります。少し待ってから読み込み直してください。</p><h3>速すぎて見えない／遅すぎる</h3><p>パネルの速度スライダーで変えられます（実行中でも変えられます）。授業の説明には ×0.5〜×1 くらい、1 手ずつ説明するときはステップ実行が便利です。</p><h3><span class="k primary">▶ 開始</span> が押せない</h3><p>実行中・終わったあとは押せません。<span class="k sec">↺ リセット</span> を押してから開始してください。入力欄の値が正しくないときも開始できません（赤字で理由が出ます）。</p><h3>パネルが画面の外に出てしまった</h3><p>ヘッダーの <span class="k sec">－</span> で縮小すると見つけやすくなります。見つけたら ⠿ をドラッグして戻し、<span class="k sec">↺</span> で 100% に戻してください。</p><h3>Space / Enter を押してもステップ実行が進まない</h3><p>入力欄にカーソルがあると効きません。パネルの何もないところをクリックしてから押してください。速度が左端（「ステップ」）になっているかも確かめてください。</p>
+
+<div class="footer">
+  配列探索アルゴリズム 使い方マニュアル（2026-11-11 版）。<span class="no-print">印刷用の <a href="/static/manual.pdf?v=1" target="_blank" rel="noopener">PDF 版</a>もあります。</span><br>
+  © 2026 Hirotaka Uoi. All rights reserved.
+</div>
+
+</div>
+</body>
+</html>
