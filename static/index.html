@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>配列探索アルゴリズム</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=6">
+  <link rel="stylesheet" href="/static/css/style.css?v=8">
 </head>
 <body data-theme="bright">
 
@@ -12,14 +12,14 @@
   <header>
     <!-- 1行目: タイトル + パネル操作 -->
     <div class="header-row">
-      <h1>🔍 配列探索アルゴリズム</h1>
+      <h1>🔍 配列探索<span class="hdr-sub">アルゴリズム</span></h1>
       <div id="toolbar">
-        <button id="btn-add-panel"  class="btn btn-add">＋ パネル追加</button>
-        <button id="btn-start-all"  class="btn btn-success">▶▶ 全開始</button>
-        <button id="btn-pause-all"  class="btn btn-warning">⏸ 全一時停止</button>
-        <button id="btn-stop-all"   class="btn btn-danger">⏹ 全停止</button>
-        <button id="btn-reset-all"  class="btn btn-secondary">↺ 全リセット</button>
-        <button id="btn-sync-size"  class="btn btn-secondary" title="最前面のパネルサイズに全パネルを合わせる">⊞ サイズ統一</button>
+        <button id="btn-add-panel"  class="btn btn-add" title="パネル追加">＋<span class="btn-text">パネル追加</span></button>
+        <button id="btn-start-all"  class="btn btn-success" title="全開始">▶▶<span class="btn-text">全開始</span></button>
+        <button id="btn-pause-all"  class="btn btn-warning" title="全一時停止">⏸<span class="btn-text">全一時停止</span></button>
+        <button id="btn-stop-all"   class="btn btn-danger" title="全停止">⏹<span class="btn-text">全停止</span></button>
+        <button id="btn-reset-all"  class="btn btn-secondary" title="全リセット">↺<span class="btn-text">全リセット</span></button>
+        <button id="btn-sync-size"  class="btn btn-secondary" title="最前面のパネルサイズに全パネルを合わせる">⊞<span class="btn-text">サイズ統一</span></button>
         <div id="zoom-controls">
           <button id="btn-zoom-out"   class="btn btn-secondary" title="縮小">－</button>
           <span   id="zoom-label">100%</span>
@@ -37,7 +37,7 @@
     <!-- 2行目: 全パネル一括設定 -->
     <div class="header-row" id="global-controls">
       <span class="global-label">全パネル一括:</span>
-      <label>データ数
+      <label title="データ数"><span class="lbl">データ数</span>
         <select id="global-size"></select>
       </label>
       <label>target
@@ -45,11 +45,11 @@
                style="width:60px" title="探索する値 (空欄=自動)">
       </label>
       <div class="speed-group">
-        <label>速度</label>
+        <label class="lbl">速度</label>
         <input type="range" id="global-speed" min="1" max="200" value="80" title="大きいほど速い。左端はステップ実行（Space / Enter で 1 コマ）。ステップ・×0.1・×0.5・×1・×2・×5・×10 で止まる">
         <span id="global-speed-val">×1</span>
       </div>
-      <button id="btn-apply-global" class="btn btn-secondary">↕ 全パネルへ適用</button>
+      <button id="btn-apply-global" class="btn btn-secondary" title="全パネルへ適用">↕<span class="lbl-long">全パネルへ適用</span><span class="lbl-short">適用</span></button>
     </div>
   </header>
 
@@ -59,6 +59,6 @@
   <!-- ===== スクリプト ===== -->
   <script src="/static/js/array_canvas.js?v=12"></script>
   <script src="/static/js/ws_client.js?v=2"></script>
-  <script src="/static/js/app.js?v=21"></script>
+  <script src="/static/js/app.js?v=23"></script>
 </body>
 </html>

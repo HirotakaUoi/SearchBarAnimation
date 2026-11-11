@@ -381,6 +381,58 @@ header h1 {
   opacity: 1 !important;
 }
 
+/* ===== ヘッダーの詰め方 =====
+   ウインドウが狭いとき、app.js の _fitHeader が、ヘッダー（タイトル・ツールバー・全パネル一括）が
+   2 行に収まるまで header に fit-1〜fit-5 を順に付ける（前の段階の詰め方も残したまま次を足す）。
+   fit-1: 小さめ表示。ボタン・文字・入力欄を小さくし、上下の余白を詰めて、行の高さを低くする
+   fit-2: タイトルの副題・「全パネル一括:」を省き、「全パネルへ適用」を「適用」に、一括の速度スライダーを短く
+   fit-3: ツールバーのボタンをアイコンだけに（文字はボタンの title で出る）
+   fit-4: タイトルを隠し、間隔を詰め、一括の速度スライダーをさらに短く
+   fit-5: 一括設定の見出し（データ数・速度など。title で出る）を省き、ボタンの左右の余白を詰める */
+/* タイトルは縮めない（flex: 1 は基準幅 0 なので、ツールバーと同じ行に押し込まれて末尾が切れていた）。
+   収まらなければ行が増え、_fitHeader が次の段階へ進む */
+header h1 { flex: 1 0 auto; white-space: nowrap; }
+.btn .lbl-short { display: none; }
+
+/* fit-1: 小さめ表示（行の高さは、文字の大きさ × 行の高さ + 上下の余白で決まる。記号や絵文字で行が
+   高くならないよう、行の高さを数値で決める） */
+header.fit-1 { padding: 5px 10px; gap: 4px; margin-bottom: 8px; }
+header.fit-1 h1 { font-size: 1.05rem; line-height: 1.25; }
+header.fit-1 .header-row,
+header.fit-1 #toolbar { gap: 6px; }
+header.fit-1 .btn,
+header.fit-1 .btn-add,
+header.fit-1 .theme-btn { font-size: .72rem; line-height: 1.25; padding: 3px 9px; }
+header.fit-1 #zoom-controls,
+header.fit-1 #theme-controls { margin-left: 4px; padding-left: 6px; }
+header.fit-1 #zoom-label { font-size: .72rem; min-width: 2.8em; }
+header.fit-1 #global-controls { padding: 2px 10px; gap: 8px; }
+header.fit-1 #global-controls label,
+header.fit-1 #toolbar label,
+header.fit-1 .global-label { font-size: .7rem; }
+header.fit-1 select,
+header.fit-1 input[type=number] { font-size: .72rem; line-height: 1.25; padding: 1px 4px; }
+header.fit-1 #global-speed-val { font-size: .72rem; }
+
+/* fit-2〜fit-5: 横幅を詰める */
+header.fit-2 .hdr-sub,
+header.fit-2 .global-label,
+header.fit-2 .btn .lbl-long { display: none; }
+header.fit-2 .btn .lbl-short { display: inline; }
+header.fit-2 #global-controls #global-speed { width: 160px; }
+header.fit-3 #toolbar .btn-text { display: none; }
+header.fit-4 h1 { display: none; }
+header.fit-4 .header-row,
+header.fit-4 #toolbar,
+header.fit-4 #global-controls { gap: 5px; }
+header.fit-4 #zoom-controls,
+header.fit-4 #theme-controls { margin-left: 2px; padding-left: 5px; }
+header.fit-4 #global-controls #global-speed { width: 110px; }
+header.fit-5 .lbl { display: none; }
+header.fit-5 .btn,
+header.fit-5 .btn-add,
+header.fit-5 .theme-btn { padding-left: 6px; padding-right: 6px; }
+
 /* ===== テーマ: 明るめ ===== */
 body[data-theme="bright"] {
   background: #eaecf6;

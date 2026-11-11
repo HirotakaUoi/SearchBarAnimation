@@ -37,6 +37,61 @@ function _snapValue(val, snapPoints, threshold) {
   return closest;
 }
 
+// ===== ヘッダーを 2 行に収める ====================================
+// ウインドウが狭いとき、ヘッダー（タイトル・ツールバー・全パネル一括）が 2 行に収まるまで、
+// header に fit-1〜fit-5 を順に付けて詰める（まず文字やボタンを小さくし、次に横幅を詰める。
+// 詰め方は style.css の「ヘッダーの詰め方」）。
+// ウインドウの幅が変わるたびに、詰めていない状態から測り直す
+const HEADER_MAX_LINES  = 2;
+const HEADER_FIT_LEVELS = 5;
+
+/** ヘッダーの中身が何行に並んでいるか（縦に重なる項目は同じ行と数える） */
+function _headerLineCount(header) {
+  const rects = [...header.querySelectorAll("h1, #toolbar > *, #global-controls > *")]
+    .map(el => el.getBoundingClientRect())
+    .filter(r => r.width > 0 && r.height > 0)
+    .sort((a, b) => a.top - b.top);
+  let lines = 0, bottom = -Infinity;
+  for (const r of rects) {
+    if (r.top >= bottom - 1) { lines++; bottom = r.bottom; }
+    else bottom = Math.max(bottom, r.bottom);
+  }
+  return lines;
+}
+
+function _fitHeader() {
+  const header = document.querySelector("header");
+  if (!header) return;
+  let lv = 0;
+  for (;;) {
+    for (let i = 1; i <= HEADER_FIT_LEVELS; i++) header.classList.toggle(`fit-${i}`, i <= lv);
+    if (lv >= HEADER_FIT_LEVELS || _headerLineCount(header) <= HEADER_MAX_LINES) break;
+    lv++;
+  }
+  header.dataset.fit = String(lv);
+}
+
+function _setupHeaderFit() {
+  let pending = false;
+  const request = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; _fitHeader(); });
+  };
+  window.addEventListener("resize", request);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(request);
+  _fitHeader();
+}
+
+/** 「全一時停止」ボタンの表示（ヘッダーを詰めたときアイコンだけになるよう、文字は .btn-text に入れる） */
+function _setPauseAllLabel(paused) {
+  const btn = document.getElementById("btn-pause-all");
+  if (!btn) return;
+  const [icon, text] = paused ? ["▶", "全再開"] : ["⏸", "全一時停止"];
+  btn.innerHTML = `${icon}<span class="btn-text">${text}</span>`;
+  btn.title = text;
+}
+
 // ===== 起動 ========================================================
 window.addEventListener("DOMContentLoaded", async () => {
   await loadMeta();
@@ -51,6 +106,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("btn-sync-size")   .addEventListener("click", syncSize);
   document.getElementById("btn-apply-global").addEventListener("click", applyGlobalToAll);
   addPanel();
+  _setupHeaderFit();
 });
 
 async function loadMeta() {
@@ -323,22 +379,21 @@ function pauseAll() {
     if (anyRunning && !p.isPaused) p.togglePause();
     else if (!anyRunning && p.isPaused) p.togglePause();
   });
-  document.getElementById("btn-pause-all").textContent =
-    anyRunning ? "▶ 全再開" : "⏸ 全一時停止";
+  _setPauseAllLabel(anyRunning);
 }
 function stopAll() {
   document.querySelectorAll(".panel").forEach((el) => {
     const p = el._panel;
     if (p && p.isRunning) p.stop();
   });
-  document.getElementById("btn-pause-all").textContent = "⏸ 全一時停止";
+  _setPauseAllLabel(false);
 }
 function resetAll() {
   document.querySelectorAll(".panel").forEach((el) => {
     const p = el._panel;
     if (p) p.reset();
   });
-  document.getElementById("btn-pause-all").textContent = "⏸ 全一時停止";
+  _setPauseAllLabel(false);
 }
 
 // ===================================================================
